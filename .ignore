@@ -1,0 +1,10 @@
+# For macOS
+.DS_Store
+*/.DS_Store
+/.idea
+
+# For windows
+
+
+# For all
+/build
