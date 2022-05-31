@@ -39,6 +39,9 @@ private:
   std::unique_ptr<Model> _bunny;
   std::unique_ptr<Model> _cube;
   std::unique_ptr<Model> _cone;
+  std::unique_ptr<Model> _cylinder;
+  std::unique_ptr<Model> _roundtable;
+  std::unique_ptr<Model> _newsphere;
 
   std::unique_ptr<SimpleMaterial> _simpleMaterial;
   std::unique_ptr<BlendMaterial> _blendMaterial;

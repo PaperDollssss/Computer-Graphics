@@ -3,6 +3,7 @@
 #include <imgui_impl_opengl3.h>
 #include <vector>
 
+#include "genBaseElements.h"
 #include "texture_mapping.h"
 
 const std::string modelPath = "../../media/sphere.obj";
@@ -13,8 +14,16 @@ const std::string planetTexturePath = "../../media/planet_Quom1200.png";
 int cursorvisible = 0;
 bool YES = false;
 
-std::vector<Vertex> v;
-std::vector<uint32_t> i;
+std::vector<Vertex> cubeVertices;
+std::vector<GLuint> cubeIndices;
+std::vector<Vertex> coneVertices;
+std::vector<GLuint> coneIndices;
+std::vector<Vertex> cylinderVertices;
+std::vector<GLuint> cylinderIndices;
+std::vector<Vertex> roundtableVertices;
+std::vector<GLuint> roundtableIndices;
+std::vector<Vertex> newsphereVertices;
+std::vector<GLuint> newsphereIndices;
 double timet = 0.0;
 float OrbitRadius = 10.0f;
 float OrbitX = 0, OrbitZ = OrbitRadius;
@@ -28,134 +37,11 @@ const std::vector<std::string> skyboxTexturePaths = {
     "../../media/starfield/Back_Tex.jpg"};
 
 TextureMapping::TextureMapping(const Options &options) : Application(options) {
-
-  Vertex CubeVertex[36] = {
-      {glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f),
-       glm::vec2(0.0f, 0.0f)},
-      {glm::vec3(0.5f, -0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f),
-       glm::vec2(1.0f, 0.0f)},
-      {glm::vec3(0.5f, 0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f),
-       glm::vec2(1.0f, 1.0f)},
-      {glm::vec3(0.5f, 0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f),
-       glm::vec2(1.0f, 1.0f)},
-      {glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f),
-       glm::vec2(0.0f, 1.0f)},
-      {glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f),
-       glm::vec2(0.0f, 0.0f)}
-
-      ,
-      {glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f),
-       glm::vec2(0.0f, 0.0f)},
-      {glm::vec3(0.5f, -0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f),
-       glm::vec2(1.0f, 0.0f)},
-      {glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f),
-       glm::vec2(1.0f, 1.0f)},
-      {glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f),
-       glm::vec2(1.0f, 1.0f)},
-      {glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f),
-       glm::vec2(0.0f, 1.0f)},
-      {glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f),
-       glm::vec2(0.0f, 0.0f)}
-
-      ,
-      {glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3(-1.0f, 0.0f, 0.0f),
-       glm::vec2(1.0f, 0.0f)},
-      {glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec3(-1.0f, 0.0f, 0.0f),
-       glm::vec2(1.0f, 1.0f)},
-      {glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(-1.0f, 0.0f, 0.0f),
-       glm::vec2(0.0f, 1.0f)},
-      {glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(-1.0f, 0.0f, 0.0f),
-       glm::vec2(0.0f, 1.0f)},
-      {glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec3(-1.0f, 0.0f, 0.0f),
-       glm::vec2(0.0f, 0.0f)},
-      {glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3(-1.0f, 0.0f, 0.0f),
-       glm::vec2(1.0f, 0.0f)}
-
-      ,
-      {glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(1.0f, 0.0f, 0.0f),
-       glm::vec2(1.0f, 0.0f)},
-      {glm::vec3(0.5f, 0.5f, -0.5f), glm::vec3(1.0f, 0.0f, 0.0f),
-       glm::vec2(1.0f, 1.0f)},
-      {glm::vec3(0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 0.0f, 0.0f),
-       glm::vec2(0.0f, 1.0f)},
-      {glm::vec3(0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 0.0f, 0.0f),
-       glm::vec2(0.0f, 1.0f)},
-      {glm::vec3(0.5f, -0.5f, 0.5f), glm::vec3(1.0f, 0.0f, 0.0f),
-       glm::vec2(0.0f, 0.0f)},
-      {glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(1.0f, 0.0f, 0.0f),
-       glm::vec2(1.0f, 0.0f)}
-
-      ,
-      {glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.0f, -1.0f, 0.0f),
-       glm::vec2(0.0f, 1.0f)},
-      {glm::vec3(0.5f, -0.5f, -0.5f), glm::vec3(0.0f, -1.0f, 0.0f),
-       glm::vec2(1.0f, 1.0f)},
-      {glm::vec3(0.5f, -0.5f, 0.5f), glm::vec3(0.0f, -1.0f, 0.0f),
-       glm::vec2(1.0f, 0.0f)},
-      {glm::vec3(0.5f, -0.5f, 0.5f), glm::vec3(0.0f, -1.0f, 0.0f),
-       glm::vec2(1.0f, 0.0f)},
-      {glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec3(0.0f, -1.0f, 0.0f),
-       glm::vec2(0.0f, 0.0f)},
-      {glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.0f, -1.0f, 0.0f),
-       glm::vec2(0.0f, 1.0f)}
-
-      ,
-      {glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec3(0.0f, 1.0f, 0.0f),
-       glm::vec2(0.0f, 1.0f)},
-      {glm::vec3(0.5f, 0.5f, -0.5f), glm::vec3(0.0f, 1.0f, 0.0f),
-       glm::vec2(1.0f, 1.0f)},
-      {glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 1.0f, 0.0f),
-       glm::vec2(1.0f, 0.0f)},
-      {glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 1.0f, 0.0f),
-       glm::vec2(1.0f, 0.0f)},
-      {glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 1.0f, 0.0f),
-       glm::vec2(0.0f, 0.0f)},
-      {glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec3(0.0f, 1.0f, 0.0f),
-       glm::vec2(0.0f, 1.0f)}};
-
-  for (int x = 0; x < 36; x++) {
-    v.push_back(Vertex(CubeVertex[x]));
-    i.push_back(uint32_t(x));
-  }
-  int num_stacks = 100;
-  double angle = 2 * M_PI / num_stacks;
-
-  std::vector<Vertex> vertices;
-  std::vector<GLuint> indices;
-  float radius = 3;
-  float height = 5;
-
-  Vertex tmp;
-  tmp.position = glm::vec3(0, 0, 0);
-  tmp.normal = glm::vec3(0, 0, 0);
-  tmp.texCoord = glm::vec2(0, 0);
-  vertices.push_back(tmp);
-  for (int i = 0; i < num_stacks; ++i) {
-    tmp.position =
-        glm::vec3(cos(angle * i) * radius, -sin(angle * i) * radius, 0);
-    tmp.normal = glm::vec3(0, 0, 0);
-    tmp.texCoord = glm::vec2(0, 0);
-    vertices.push_back(tmp);
-    if (i > 0) {
-      indices.push_back(0);
-      indices.push_back(i);
-      indices.push_back(i + 1);
-      indices.push_back(i);
-      indices.push_back(i + 1);
-      indices.push_back(num_stacks + 1);
-    } else if (i == 0) {
-      indices.push_back(0);
-      indices.push_back(num_stacks);
-      indices.push_back(1);
-      indices.push_back(1);
-      indices.push_back(num_stacks + 1);
-      indices.push_back(num_stacks);
-    }
-  }
-  tmp.position = glm::vec3(0, 0, height);
-  tmp.normal = glm::vec3(0, 0, 0);
-  tmp.texCoord = glm::vec2(0, 0);
-  vertices.push_back(tmp);
+  genCube(cubeVertices, cubeIndices);
+  genCone(coneVertices, coneIndices);
+  genCylinder(cylinderVertices, cylinderIndices);
+  genRoundTable(roundtableVertices, roundtableIndices);
+  genShpere(newsphereVertices, newsphereIndices);
   // init model
 
   _sphere.reset(new Model(modelPath));
@@ -166,13 +52,25 @@ TextureMapping::TextureMapping(const Options &options) : Application(options) {
   _bunny->scale = glm::vec3(1.0f, 1.0f, 1.0f);
   _bunny->position = glm::vec3(10.0f, 5.0f, 0.0f);
 
-  _cube.reset(new Model(v, i));
+  _cube.reset(new Model(cubeVertices, cubeIndices));
   _cube->scale = glm::vec3(1.0f, 1.0f, 1.0f);
   _cube->position = glm::vec3(10.0f, -5.0f, 0.0f);
 
-  _cone.reset(new Model(vertices, indices));
+  _cone.reset(new Model(coneVertices, coneIndices));
   _cone->scale = glm::vec3(2.0f, 2.0f, 2.0f);
-  _cone->position = glm::vec3(-10.0f, -5.0f, 0.0f);
+  _cone->position = glm::vec3(-10.0f, -15.0f, 0.0f);
+
+  _cylinder.reset(new Model(cylinderVertices, cylinderIndices));
+  _cylinder->scale = glm::vec3(2.0f, 2.0f, 2.0f);
+  _cylinder->position = glm::vec3(-10.0f, -5.0f, 0.0f);
+
+  _roundtable.reset(new Model(roundtableVertices, roundtableIndices));
+  _roundtable->scale = glm::vec3(2.0f, 2.0f, 2.0f);
+  _roundtable->position = glm::vec3(20.0f, 5.0f, 0.0f);
+
+  _newsphere.reset(new Model(newsphereVertices, newsphereIndices));
+  _newsphere->scale = glm::vec3(2.0f, 2.0f, 2.0f);
+  _newsphere->position = glm::vec3(40.0f, 5.0f, 0.0f);
 
   // init textures
   std::shared_ptr<Texture2D> earthTexture =
@@ -641,7 +539,7 @@ void TextureMapping::renderFrame() {
     _simpleShader->setMat4("projection", projection);
     _simpleShader->setMat4("view", view);
     _simpleShader->setMat4("model", _sphere->getModelMatrix());
-    _sphere->draw();
+    //    _sphere->draw();
     _bunny->scale = glm::vec3(y + 0.3, y + 0.3, y + 0.3);
 
     _shader->use();
@@ -654,7 +552,13 @@ void TextureMapping::renderFrame() {
     _shader->setMat4("model", _cube->getModelMatrix());
     _cube->draw();
     _shader->setMat4("model", _cone->getModelMatrix());
-    _cone->draw();
+    //    _cone->draw();
+    _shader->setMat4("model", _cylinder->getModelMatrix());
+    //    _cylinder->draw();
+    _shader->setMat4("model", _roundtable->getModelMatrix());
+    _roundtable->draw();
+    _shader->setMat4("model", _newsphere->getModelMatrix());
+    _newsphere->draw();
 
     // 3. enable textures and transform textures to gpu
     glActiveTexture(GL_TEXTURE0);
@@ -673,6 +577,8 @@ void TextureMapping::renderFrame() {
     _bunny->draw();
     _blendShader->setMat4("model", _cube->getModelMatrix());
     _cube->draw();
+    _blendShader->setMat4("model", _newsphere->getModelMatrix());
+    _newsphere->draw();
     // 3. transfer light attributes to gpu
     _blendShader->setVec3("light.direction", _light->getFront());
     _blendShader->setVec3("light.color", _light->color);
