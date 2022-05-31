@@ -1,0 +1,9 @@
+# For macOS
+*/.DS_Store 
+/.idea
+
+# For windows
+
+
+# For all
+/build
