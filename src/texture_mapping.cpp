@@ -120,7 +120,8 @@ TextureMapping::TextureMapping(const Options &options) : Application(options) {
   ImGui_ImplOpenGL3_Init();
 }
 
-TextureMapping::~TextureMapping() {
+TextureMapping::~TextureMapping()
+{
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
@@ -292,9 +293,12 @@ void TextureMapping::renderFrame() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glEnable(GL_DEPTH_TEST);
 
-  if (wireframe) {
+  if (wireframe)
+  {
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  } else {
+  }
+  else
+  {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   }
 
@@ -316,7 +320,8 @@ void TextureMapping::renderFrame() {
   std::shared_ptr<Model> curNPC = NPC.changeModel();
 
   // draw planet
-  switch (_renderMode) {
+  switch (_renderMode)
+  {
   case RenderMode::Simple:
     // 1. use the shader
     _simpleShader->use();
@@ -416,9 +421,12 @@ void TextureMapping::renderFrame() {
   const auto flags =
       ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings;
 
-  if (!ImGui::Begin("Control Panel", nullptr, flags)) {
+  if (!ImGui::Begin("Control Panel", nullptr, flags))
+  {
     ImGui::End();
-  } else {
+  }
+  else
+  {
     ImGui::Text("Render Mode");
     ImGui::Separator();
     ImGui::RadioButton("Simple Texture Shading", (int *)&_renderMode,
