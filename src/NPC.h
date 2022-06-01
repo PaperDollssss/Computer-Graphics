@@ -5,6 +5,7 @@
 #ifndef FINAL_PROJECT_SRC_NPC_H_
 #define FINAL_PROJECT_SRC_NPC_H_
 #include "base/model.h"
+#include <memory>
 #include <string>
 #include <vector>
 
