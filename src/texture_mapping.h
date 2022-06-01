@@ -39,6 +39,10 @@ private:
   std::unique_ptr<Model> _bunny;
   std::unique_ptr<Model> _cube;
   std::unique_ptr<Model> _cone;
+  std::unique_ptr<Model> _cylinder;
+  std::unique_ptr<Model> _roundtable;
+  std::unique_ptr<Model> _maze;
+  std::unique_ptr<Model> _newsphere;
 
   std::unique_ptr<SimpleMaterial> _simpleMaterial;
   std::unique_ptr<BlendMaterial> _blendMaterial;
@@ -47,6 +51,7 @@ private:
   std::unique_ptr<PerspectiveCamera> _camera;
   std::unique_ptr<DirectionalLight> _light;
 
+  std::unique_ptr<GLSLProgram> _instancedShader;
   std::unique_ptr<GLSLProgram> _shader;
   std::unique_ptr<GLSLProgram> _simpleShader;
   std::unique_ptr<GLSLProgram> _blendShader;
@@ -56,6 +61,8 @@ private:
 
   enum RenderMode _renderMode = RenderMode::Simple;
 
+  void initInstancedShader();
+  
   void initShader();
 
   void initSimpleShader();
@@ -67,4 +74,7 @@ private:
   void handleInput() override;
 
   void renderFrame() override;
+
+  std::vector<glm::mat4> _modelMatrices;
+
 };
