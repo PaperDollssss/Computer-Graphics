@@ -193,6 +193,7 @@ void TextureMapping::handleInput() {
     _camera->position = glm::vec3(OrbitX, _camera->position.y, OrbitZ);
   }
   if (_keyboardInput.keyStates[GLFW_KEY_W] != GLFW_RELEASE) {
+    
     cameraPos = cameraMoveSpeed * _camera->getFront();
     _camera->position += cameraPos;
   }
@@ -216,6 +217,9 @@ void TextureMapping::handleInput() {
     cameraPos = cameraMoveSpeed * cameraUp;
     _camera->position += cameraPos;
   }
+  if (_keyboardInput.keyStates[GLFW_KEY_P] != GLFW_RELEASE) {
+		SaveScreenShot(_windowWidth, _windowHeight);
+	}
   if (_keyboardInput.keyStates[GLFW_KEY_ENTER] != GLFW_RELEASE) {
     YES = true;
   }
@@ -371,7 +375,7 @@ void TextureMapping::renderFrame() {
     _bunny->draw();
     _blendShader->setMat4("model", _cube->getModelMatrix());
     _cube->draw();
-    _blendShader->setMat4("maze", _cube->getModelMatrix());
+    _blendShader->setMat4("maze", _maze->getModelMatrix());
     _maze->draw();
     _blendShader->setMat4("model", _newsphere->getModelMatrix());
     _newsphere->draw();

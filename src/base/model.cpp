@@ -6,7 +6,8 @@
 
 #include "model.h"
 
-Model::Model(const std::string &filepath) {
+Model::Model(const std::string &filepath)
+{
   obj::attrib_o attrib;
   std::vector<obj::shape_o> shapes;
 
@@ -15,11 +16,13 @@ Model::Model(const std::string &filepath) {
   std::string::size_type index = filepath.find_last_of("/");
   std::string mtlBaseDir = filepath.substr(0, index + 1);
 
-  if (!obj::LoadObj(attrib, shapes, filepath.c_str())) {
+  if (!obj::LoadObj(attrib, shapes, filepath.c_str()))
+  {
     throw std::runtime_error("load " + filepath + " failure: " + err);
   }
 
-  if (!err.empty()) {
+  if (!err.empty())
+  {
     std::cerr << err << std::endl;
   }
 
@@ -27,22 +30,26 @@ Model::Model(const std::string &filepath) {
   std::vector<uint32_t> indices;
   std::unordered_map<Vertex, uint32_t> uniqueVertices;
 
-  for (const auto &shape : shapes) {
-    for (const auto &index : shape.mesh.indices) {
+  for (const auto &shape : shapes)
+  {
+    for (const auto &index : shape.mesh.indices)
+    {
       Vertex vertex{};
 
       vertex.position.x = attrib.vertices[3 * index.v_index + 0];
       vertex.position.y = attrib.vertices[3 * index.v_index + 1];
       vertex.position.z = attrib.vertices[3 * index.v_index + 2];
 
-      if (index.n_index >= 0) {
+      if (index.n_index >= 0)
+      {
         vertex.normal.x = attrib.norms[3 * index.n_index + 0];
         vertex.normal.y = attrib.norms[3 * index.n_index + 1];
         vertex.normal.z = attrib.norms[3 * index.n_index + 2];
       }
 
       // check if the vertex appeared before to reduce redundant data
-      if (uniqueVertices.count(vertex) == 0) {
+      if (uniqueVertices.count(vertex) == 0)
+      {
         uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
         vertices.push_back(vertex);
       }
@@ -61,7 +68,8 @@ Model::Model(const std::string &filepath) {
   initBoxGLResources();
 
   GLenum error = glGetError();
-  if (error != GL_NO_ERROR) {
+  if (error != GL_NO_ERROR)
+  {
     cleanup();
     throw std::runtime_error("OpenGL Error: " + std::to_string(error));
   }
@@ -69,7 +77,8 @@ Model::Model(const std::string &filepath) {
 
 Model::Model(const std::vector<Vertex> &vertices,
              const std::vector<uint32_t> &indices)
-    : _vertices(vertices), _indices(indices) {
+    : _vertices(vertices), _indices(indices)
+{
 
   computeBoundingBox();
 
@@ -78,7 +87,8 @@ Model::Model(const std::vector<Vertex> &vertices,
   initBoxGLResources();
 
   GLenum error = glGetError();
-  if (error != GL_NO_ERROR) {
+  if (error != GL_NO_ERROR)
+  {
     cleanup();
     throw std::runtime_error("OpenGL Error: " + std::to_string(error));
   }
@@ -88,7 +98,8 @@ Model::Model(Model &&rhs) noexcept
     : _vertices(std::move(rhs._vertices)), _indices(std::move(rhs._indices)),
       _boundingBox(std::move(rhs._boundingBox)), _vao(rhs._vao), _vbo(rhs._vbo),
       _ebo(rhs._ebo), _boxVao(rhs._boxVao), _boxVbo(rhs._boxVbo),
-      _boxEbo(rhs._boxEbo) {
+      _boxEbo(rhs._boxEbo)
+{
   _vao = 0;
   _vbo = 0;
   _ebo = 0;
@@ -101,14 +112,16 @@ Model::~Model() { cleanup(); }
 
 BoundingBox Model::getBoundingBox() const { return _boundingBox; }
 
-void Model::draw() const {
+void Model::draw() const
+{
   glBindVertexArray(_vao);
   glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(_indices.size()),
                  GL_UNSIGNED_INT, 0);
   glBindVertexArray(0);
 }
 
-void Model::drawBoundingBox() const {
+void Model::drawBoundingBox() const
+{
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   glBindVertexArray(_boxVao);
   glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, 0);
@@ -124,7 +137,8 @@ size_t Model::getVertexCount() const { return _vertices.size(); }
 
 size_t Model::getFaceCount() const { return _indices.size() / 3; }
 
-void Model::initGLResources() {
+void Model::initGLResources()
+{
   // create a vertex array object
   glGenVertexArrays(1, &_vao);
   // create a vertex buffer object
@@ -156,7 +170,8 @@ void Model::initGLResources() {
   glBindVertexArray(0);
 }
 
-void Model::computeBoundingBox() {
+void Model::computeBoundingBox()
+{
   float minX = std::numeric_limits<float>::max();
   float minY = std::numeric_limits<float>::max();
   float minZ = std::numeric_limits<float>::max();
@@ -164,7 +179,8 @@ void Model::computeBoundingBox() {
   float maxY = -std::numeric_limits<float>::max();
   float maxZ = -std::numeric_limits<float>::max();
 
-  for (const auto &v : _vertices) {
+  for (const auto &v : _vertices)
+  {
     minX = std::min(v.position.x, minX);
     minY = std::min(v.position.y, minY);
     minZ = std::min(v.position.z, minZ);
@@ -177,7 +193,8 @@ void Model::computeBoundingBox() {
   _boundingBox.max = glm::vec3(maxX, maxY, maxZ);
 }
 
-void Model::initBoxGLResources() {
+void Model::initBoxGLResources()
+{
   std::vector<glm::vec3> boxVertices = {
       glm::vec3(_boundingBox.min.x, _boundingBox.min.y, _boundingBox.min.z),
       glm::vec3(_boundingBox.max.x, _boundingBox.min.y, _boundingBox.min.z),
@@ -211,34 +228,67 @@ void Model::initBoxGLResources() {
   glBindVertexArray(0);
 }
 
-void Model::cleanup() {
-  if (_boxEbo) {
+void Model::cleanup()
+{
+  if (_boxEbo)
+  {
     glDeleteBuffers(1, &_boxEbo);
     _boxEbo = 0;
   }
 
-  if (_boxVbo) {
+  if (_boxVbo)
+  {
     glDeleteBuffers(1, &_boxVbo);
     _boxVbo = 0;
   }
 
-  if (_boxVao) {
+  if (_boxVao)
+  {
     glDeleteVertexArrays(1, &_boxVao);
     _boxVao = 0;
   }
 
-  if (_ebo != 0) {
+  if (_ebo != 0)
+  {
     glDeleteBuffers(1, &_ebo);
     _ebo = 0;
   }
 
-  if (_vbo != 0) {
+  if (_vbo != 0)
+  {
     glDeleteBuffers(1, &_vbo);
     _vbo = 0;
   }
 
-  if (_vao != 0) {
+  if (_vao != 0)
+  {
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
   }
+}
+
+bool Model::checkBoundingBox(const glm::vec3 &point) const
+{
+  if (point.x < _boundingBox.min.x)
+    return false;
+  if (point.y < _boundingBox.min.y)
+    return false;
+  if (point.z < _boundingBox.min.z)
+    return false;
+  if (point.x > _boundingBox.max.x)
+    return false;
+  if (point.y > _boundingBox.max.y)
+    return false;
+  if (point.z > _boundingBox.max.z)
+    return false;
+  return true;
+}
+
+bool Model::checkBoundingBall(const glm::vec3 &point) const
+{
+  // sphereRadius = 5
+  if (sqrt(pow((point.x - position.x), 2) + pow((point.y - position.y), 2) + pow((point.z - position.z), 2)) > 5)
+    return false;
+  else
+    return true;
 }

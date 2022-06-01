@@ -29,6 +29,10 @@ public:
 
     BoundingBox getBoundingBox() const;
 
+    bool checkBoundingBox(const glm::vec3 &point) const;// judge whether in the bounding box
+
+    bool checkBoundingBall(const glm::vec3 &point) const;// judge whether in the bounding ball
+
     virtual void draw() const;
 
     virtual void drawBoundingBox() const;

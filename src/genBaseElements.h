@@ -1,7 +1,6 @@
 //
 // Created by 胡宇森 on 2022/5/30.
 //
-#define _USE_MATH_DEFINES
 #ifndef FINAL_PROJECT_SRC_GENBASEELEMENTS_H_
 #define FINAL_PROJECT_SRC_GENBASEELEMENTS_H_
 #include <memory>

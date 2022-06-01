@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <windows.h>
 
 #include "base/application.h"
 #include "base/camera.h"
@@ -13,25 +14,35 @@
 
 #include "NPC.h"
 #include "genBaseElements.h"
+#include "screenshot.h"
 
-enum class RenderMode { Simple, Blend, Checker };
+enum class RenderMode
+{
+  Simple,
+  Blend,
+  Checker
+};
 
-struct SimpleMaterial {
+struct SimpleMaterial
+{
   std::shared_ptr<Texture2D> mapKd;
 };
 
-struct BlendMaterial {
+struct BlendMaterial
+{
   glm::vec3 kds[2];
   std::shared_ptr<Texture2D> mapKds[2];
   float blend;
 };
 
-struct CheckerMaterial {
+struct CheckerMaterial
+{
   int repeat;
   glm::vec3 colors[2];
 };
 
-class TextureMapping : public Application {
+class TextureMapping : public Application
+{
 public:
   TextureMapping(const Options &options);
 
