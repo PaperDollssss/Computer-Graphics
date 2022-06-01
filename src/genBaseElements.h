@@ -4,7 +4,6 @@
 #define _USE_MATH_DEFINES
 #ifndef FINAL_PROJECT_SRC_GENBASEELEMENTS_H_
 #define FINAL_PROJECT_SRC_GENBASEELEMENTS_H_
-#define M_PI 3.1415926
 #include <memory>
 #include <string>
 
