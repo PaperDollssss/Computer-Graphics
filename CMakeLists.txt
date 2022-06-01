@@ -22,7 +22,7 @@ file(GLOB BASE_SRC ${SOURCE_PATH}/base/*.cpp)
 file(GLOB PROJECT_HDR ${SOURCE_PATH}/*.h)
 file(GLOB PROJECT_SRC ${SOURCE_PATH}/*.cpp)
 
-add_executable(final_project ${BASE_HDR} ${BASE_SRC} ${PROJECT_HDR} ${PROJECT_SRC} src/genBaseElements.cpp src/genBaseElements.h)
+add_executable(final_project ${BASE_HDR} ${BASE_SRC} ${PROJECT_HDR} ${PROJECT_SRC} src/genBaseElements.cpp src/genBaseElements.h src/NPC.cpp src/NPC.h)
 
 if (WIN32)
     set_target_properties(${PROJECT_NAME} PROPERTIES
