@@ -11,6 +11,9 @@
 #include "base/skybox.h"
 #include "base/texture.h"
 
+#include "NPC.h"
+#include "genBaseElements.h"
+
 enum class RenderMode { Simple, Blend, Checker };
 
 struct SimpleMaterial {
@@ -35,6 +38,12 @@ public:
   ~TextureMapping();
 
 private:
+  int cursorvisible = 0;
+  bool YES = false;
+  double timet = 0.0;
+  float OrbitRadius = 10.0f;
+  float OrbitX = 0, OrbitZ = OrbitRadius;
+
   std::unique_ptr<Model> _sphere;
   std::unique_ptr<Model> _bunny;
   std::unique_ptr<Model> _cube;
@@ -43,6 +52,7 @@ private:
   std::unique_ptr<Model> _roundtable;
   std::unique_ptr<Model> _maze;
   std::unique_ptr<Model> _newsphere;
+  npc NPC;
 
   std::unique_ptr<SimpleMaterial> _simpleMaterial;
   std::unique_ptr<BlendMaterial> _blendMaterial;
@@ -62,7 +72,7 @@ private:
   enum RenderMode _renderMode = RenderMode::Simple;
 
   void initInstancedShader();
-  
+
   void initShader();
 
   void initSimpleShader();
@@ -76,5 +86,4 @@ private:
   void renderFrame() override;
 
   std::vector<glm::mat4> _modelMatrices;
-
 };
