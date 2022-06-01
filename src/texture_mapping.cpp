@@ -1,3 +1,4 @@
+#define _USE_MATH_DEFINES
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -27,7 +28,8 @@ const std::vector<std::string> skyboxTexturePaths = {
     "../../media/starfield/Front_Tex.jpg",
     "../../media/starfield/Back_Tex.jpg"};
 
-TextureMapping::TextureMapping(const Options &options) : Application(options) {
+TextureMapping::TextureMapping(const Options &options) : Application(options)
+{
 
   Vertex CubeVertex[36] = {
       {glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f),
@@ -113,7 +115,8 @@ TextureMapping::TextureMapping(const Options &options) : Application(options) {
       {glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec3(0.0f, 1.0f, 0.0f),
        glm::vec2(0.0f, 1.0f)}};
 
-  for (int x = 0; x < 36; x++) {
+  for (int x = 0; x < 36; x++)
+  {
     v.push_back(Vertex(CubeVertex[x]));
     i.push_back(uint32_t(x));
   }
@@ -130,20 +133,24 @@ TextureMapping::TextureMapping(const Options &options) : Application(options) {
   tmp.normal = glm::vec3(0, 0, 0);
   tmp.texCoord = glm::vec2(0, 0);
   vertices.push_back(tmp);
-  for (int i = 0; i < num_stacks; ++i) {
+  for (int i = 0; i < num_stacks; ++i)
+  {
     tmp.position =
         glm::vec3(cos(angle * i) * radius, -sin(angle * i) * radius, 0);
     tmp.normal = glm::vec3(0, 0, 0);
     tmp.texCoord = glm::vec2(0, 0);
     vertices.push_back(tmp);
-    if (i > 0) {
+    if (i > 0)
+    {
       indices.push_back(0);
       indices.push_back(i);
       indices.push_back(i + 1);
       indices.push_back(i);
       indices.push_back(i + 1);
       indices.push_back(num_stacks + 1);
-    } else if (i == 0) {
+    }
+    else if (i == 0)
+    {
       indices.push_back(0);
       indices.push_back(num_stacks);
       indices.push_back(1);
@@ -232,13 +239,15 @@ TextureMapping::TextureMapping(const Options &options) : Application(options) {
   ImGui_ImplOpenGL3_Init();
 }
 
-TextureMapping::~TextureMapping() {
+TextureMapping::~TextureMapping()
+{
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
 }
 
-void TextureMapping::initShader() {
+void TextureMapping::initShader()
+{
   const char *vsCode =
       "#version 330 core\n"
       "layout(location = 0) in vec3 aPosition;\n"
@@ -280,7 +289,8 @@ void TextureMapping::initShader() {
   _shader->link();
 }
 
-void TextureMapping::initSimpleShader() {
+void TextureMapping::initSimpleShader()
+{
   const char *vsCode =
       "#version 330 core\n"
       "layout(location = 0) in vec3 aPosition;\n"
@@ -310,7 +320,8 @@ void TextureMapping::initSimpleShader() {
   _simpleShader->link();
 }
 
-void TextureMapping::initBlendShader() {
+void TextureMapping::initBlendShader()
+{
   const char *vsCode =
       "#version 330 core\n"
       "layout(location = 0) in vec3 aPosition;\n"
@@ -380,7 +391,8 @@ void TextureMapping::initBlendShader() {
   _blendShader->link();
 }
 
-void TextureMapping::initCheckerShader() {
+void TextureMapping::initCheckerShader()
+{
   const char *vsCode =
       "#version 330 core\n"
       "layout(location = 0) in vec3 aPosition;\n"
@@ -424,7 +436,8 @@ void TextureMapping::initCheckerShader() {
   _checkerShader->link();
 }
 
-void TextureMapping::handleInput() {
+void TextureMapping::handleInput()
+{
   bool firstMouse = true;
   const float angluarVelocity = 0.1f;
   const float angle = angluarVelocity * static_cast<float>(_deltaTime);
@@ -437,36 +450,45 @@ void TextureMapping::handleInput() {
   glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
   glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
-  if (_keyboardInput.keyStates[GLFW_KEY_ESCAPE] != GLFW_RELEASE) {
+  if (_keyboardInput.keyStates[GLFW_KEY_ESCAPE] != GLFW_RELEASE)
+  {
     glfwSetWindowShouldClose(_window, true);
     return;
   }
 
-  if (_keyboardInput.keyStates[GLFW_KEY_EQUAL] != GLFW_RELEASE) {
+  if (_keyboardInput.keyStates[GLFW_KEY_EQUAL] != GLFW_RELEASE)
+  {
     _sphere->scale += glm::vec3(0.03f, 0.03f, 0.03f);
   }
-  if (_keyboardInput.keyStates[GLFW_KEY_MINUS] != GLFW_RELEASE) {
+  if (_keyboardInput.keyStates[GLFW_KEY_MINUS] != GLFW_RELEASE)
+  {
     _sphere->scale -= glm::vec3(0.03f, 0.03f, 0.03f);
     if (_sphere->scale.x < 0.03 || _sphere->scale.y < 0.03 ||
         _sphere->scale.z < 0.03)
       _sphere->scale = glm::vec3(0.03f, 0.03f, 0.03f);
   }
-  if (_keyboardInput.keyStates[GLFW_KEY_R] != GLFW_RELEASE) {
+  if (_keyboardInput.keyStates[GLFW_KEY_R] != GLFW_RELEASE)
+  {
     _sphere->position += glm::vec3(0.0f, 0.03f, 0.0f);
   }
-  if (_keyboardInput.keyStates[GLFW_KEY_Y] != GLFW_RELEASE) {
+  if (_keyboardInput.keyStates[GLFW_KEY_Y] != GLFW_RELEASE)
+  {
     _sphere->position += glm::vec3(0.0f, -0.03f, 0.0f);
   }
-  if (_keyboardInput.keyStates[GLFW_KEY_F] != GLFW_RELEASE) {
+  if (_keyboardInput.keyStates[GLFW_KEY_F] != GLFW_RELEASE)
+  {
     _sphere->position += glm::vec3(-0.03f, 0.0f, 0.0f);
   }
-  if (_keyboardInput.keyStates[GLFW_KEY_H] != GLFW_RELEASE) {
+  if (_keyboardInput.keyStates[GLFW_KEY_H] != GLFW_RELEASE)
+  {
     _sphere->position += glm::vec3(0.03f, 0.0f, 0.0f);
   }
-  if (_keyboardInput.keyStates[GLFW_KEY_T] != GLFW_RELEASE) {
+  if (_keyboardInput.keyStates[GLFW_KEY_T] != GLFW_RELEASE)
+  {
     _sphere->position += glm::vec3(0.0f, 0.0f, -0.03f);
   }
-  if (_keyboardInput.keyStates[GLFW_KEY_G] != GLFW_RELEASE) {
+  if (_keyboardInput.keyStates[GLFW_KEY_G] != GLFW_RELEASE)
+  {
     _sphere->position += glm::vec3(0.0f, 0.0f, 0.03f);
   }
 
@@ -476,7 +498,8 @@ void TextureMapping::handleInput() {
           return;
   }*/
 
-  if (_keyboardInput.keyStates[GLFW_KEY_SPACE] == GLFW_PRESS) {
+  if (_keyboardInput.keyStates[GLFW_KEY_SPACE] == GLFW_PRESS)
+  {
     _camera.reset(new PerspectiveCamera(glm::radians(50.0f),
                                         1.0f * _windowWidth / _windowHeight,
                                         0.1f, 10000.0f));
@@ -485,11 +508,13 @@ void TextureMapping::handleInput() {
         glm::lookAt(glm::vec3(0.0, 0.0, 3.0), glm::vec3(0.0, 0.0, 0.0),
                     glm::vec3(0.0, 1.0, 0.0));
   }
-  if (_keyboardInput.keyStates[GLFW_KEY_B] == GLFW_PRESS) {
+  if (_keyboardInput.keyStates[GLFW_KEY_B] == GLFW_PRESS)
+  {
     _camera->fovy = 0.872664;
   }
   Camera *camera = _camera.get();
-  if (_keyboardInput.keyStates[GLFW_KEY_O] != GLFW_RELEASE) {
+  if (_keyboardInput.keyStates[GLFW_KEY_O] != GLFW_RELEASE)
+  {
     // cameraPos = cameraMoveSpeed * cameraFront;
     timet += 0.01;
     OrbitX = sin(timet) * OrbitRadius;
@@ -499,49 +524,60 @@ void TextureMapping::handleInput() {
     _camera->position = glm::vec3(OrbitX, _camera->position.y, OrbitZ);
   }
 
-  if (_keyboardInput.keyStates[GLFW_KEY_W] != GLFW_RELEASE) {
+  if (_keyboardInput.keyStates[GLFW_KEY_W] != GLFW_RELEASE)
+  {
     // cameraPos = cameraMoveSpeed * cameraFront;
     cameraPos = cameraMoveSpeed * _camera->getFront();
     _camera->position += cameraPos;
   }
-  if (_keyboardInput.keyStates[GLFW_KEY_D] != GLFW_RELEASE) {
+  if (_keyboardInput.keyStates[GLFW_KEY_D] != GLFW_RELEASE)
+  {
     // cameraPos = glm::normalize(glm::cross(cameraFront, cameraUp)) *
     // cameraMoveSpeed;
     cameraPos = _camera->getRight() * cameraMoveSpeed;
     _camera->position += cameraPos;
   }
-  if (_keyboardInput.keyStates[GLFW_KEY_S] != GLFW_RELEASE) {
+  if (_keyboardInput.keyStates[GLFW_KEY_S] != GLFW_RELEASE)
+  {
     // cameraPos = cameraMoveSpeed * cameraFront;
     cameraPos = cameraMoveSpeed * _camera->getFront();
     _camera->position -= cameraPos;
   }
-  if (_keyboardInput.keyStates[GLFW_KEY_A] != GLFW_RELEASE) {
+  if (_keyboardInput.keyStates[GLFW_KEY_A] != GLFW_RELEASE)
+  {
     // cameraPos = glm::normalize(glm::cross(cameraFront, cameraUp)) *
     // cameraMoveSpeed;
     cameraPos = _camera->getRight() * cameraMoveSpeed;
     _camera->position -= cameraPos;
   }
-  if (_keyboardInput.keyStates[GLFW_KEY_E] != GLFW_RELEASE) {
+  if (_keyboardInput.keyStates[GLFW_KEY_E] != GLFW_RELEASE)
+  {
     cameraPos = cameraMoveSpeed * cameraUp;
     _camera->position -= cameraPos;
   }
-  if (_keyboardInput.keyStates[GLFW_KEY_Q] != GLFW_RELEASE) {
+  if (_keyboardInput.keyStates[GLFW_KEY_Q] != GLFW_RELEASE)
+  {
     cameraPos = cameraMoveSpeed * cameraUp;
     _camera->position += cameraPos;
   }
 
-  if (_keyboardInput.keyStates[GLFW_KEY_ENTER] != GLFW_RELEASE) {
+  if (_keyboardInput.keyStates[GLFW_KEY_ENTER] != GLFW_RELEASE)
+  {
     YES = true;
   }
-  if (YES == true && _keyboardInput.keyStates[GLFW_KEY_ENTER] == GLFW_RELEASE) {
-    if (cursorvisible % 2 == 0) {
+  if (YES == true && _keyboardInput.keyStates[GLFW_KEY_ENTER] == GLFW_RELEASE)
+  {
+    if (cursorvisible % 2 == 0)
+    {
       glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
       _mouseInput.move.xOld = _mouseInput.move.xCurrent = 0.5 * _windowWidth;
       _mouseInput.move.yOld = _mouseInput.move.yCurrent = 0.5 * _windowHeight;
       glfwSetCursorPos(_window, _mouseInput.move.xCurrent,
                        _mouseInput.move.yCurrent);
       cursorvisible++;
-    } else {
+    }
+    else
+    {
       glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
       _mouseInput.move.xOld = _mouseInput.move.xCurrent = 0.5 * _windowWidth;
       _mouseInput.move.yOld = _mouseInput.move.yCurrent = 0.5 * _windowHeight;
@@ -552,8 +588,10 @@ void TextureMapping::handleInput() {
     YES = false;
   }
 
-  if (cursorvisible % 2 == 0) {
-    if (_mouseInput.move.xCurrent != _mouseInput.move.xOld) {
+  if (cursorvisible % 2 == 0)
+  {
+    if (_mouseInput.move.xCurrent != _mouseInput.move.xOld)
+    {
       // if (firstMouse)
       //{
       //	_mouseInput.move.xOld = _mouseInput.move.xCurrent;
@@ -570,7 +608,8 @@ void TextureMapping::handleInput() {
       _mouseInput.move.xOld = _mouseInput.move.xCurrent;
     }
 
-    if (_mouseInput.move.yCurrent != _mouseInput.move.yOld) {
+    if (_mouseInput.move.yCurrent != _mouseInput.move.yOld)
+    {
       // if (firstMouse)
       //{
       //	_mouseInput.move.xOld = _mouseInput.move.xCurrent;
@@ -588,7 +627,8 @@ void TextureMapping::handleInput() {
     }
   }
 
-  if (_mouseInput.scroll.y != 0) {
+  if (_mouseInput.scroll.y != 0)
+  {
     printf("%f\n", _camera->fovy);
     if (_camera->fovy >= 0.05f && _camera->fovy <= 2.8f)
       _camera->fovy -= 0.02 * _mouseInput.scroll.y;
@@ -600,7 +640,8 @@ void TextureMapping::handleInput() {
   }
 }
 
-void TextureMapping::renderFrame() {
+void TextureMapping::renderFrame()
+{
   // some options related to imGUI
   static bool wireframe = false;
 
@@ -611,9 +652,12 @@ void TextureMapping::renderFrame() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glEnable(GL_DEPTH_TEST);
 
-  if (wireframe) {
+  if (wireframe)
+  {
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  } else {
+  }
+  else
+  {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   }
 
@@ -633,7 +677,8 @@ void TextureMapping::renderFrame() {
     y = 2 - ((int)t % 2 + t - (int)t);
 
   // draw planet
-  switch (_renderMode) {
+  switch (_renderMode)
+  {
   case RenderMode::Simple:
     // 1. use the shader
     _simpleShader->use();
@@ -728,9 +773,12 @@ void TextureMapping::renderFrame() {
   const auto flags =
       ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings;
 
-  if (!ImGui::Begin("Control Panel", nullptr, flags)) {
+  if (!ImGui::Begin("Control Panel", nullptr, flags))
+  {
     ImGui::End();
-  } else {
+  }
+  else
+  {
     ImGui::Text("Render Mode");
     ImGui::Separator();
     ImGui::RadioButton("Simple Texture Shading", (int *)&_renderMode,
