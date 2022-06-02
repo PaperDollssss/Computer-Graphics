@@ -41,6 +41,12 @@ struct CheckerMaterial
   glm::vec3 colors[2];
 };
 
+struct LineMaterial
+{
+  glm::vec3 color;
+  float width;
+};
+
 class TextureMapping : public Application
 {
 public:
@@ -63,7 +69,7 @@ private:
   std::unique_ptr<Model> _roundtable;
   std::unique_ptr<Model> _maze;
   std::unique_ptr<Model> _newsphere;
-  npc NPC;
+  // npc NPC;
 
   std::unique_ptr<SimpleMaterial> _simpleMaterial;
   std::unique_ptr<BlendMaterial> _blendMaterial;
@@ -71,6 +77,10 @@ private:
 
   std::unique_ptr<PerspectiveCamera> _camera;
   std::unique_ptr<DirectionalLight> _light;
+
+  std::unique_ptr<LineMaterial> _lineMaterial;
+  std::unique_ptr<GLSLProgram> _lineShader;
+  std::unique_ptr<GLSLProgram> _lineInstancedShader;
 
   std::unique_ptr<GLSLProgram> _instancedShader;
   std::unique_ptr<GLSLProgram> _shader;
@@ -97,4 +107,6 @@ private:
   void renderFrame() override;
 
   std::vector<glm::mat4> _modelMatrices;
+
+  bool checkBounding(const glm::vec3 &position);
 };

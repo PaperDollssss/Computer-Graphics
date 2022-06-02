@@ -9,13 +9,14 @@
 #include "object3d.h"
 #include "bounding_box.h"
 
-class Model : public Object3D {
+class Model : public Object3D
+{
 public:
-    Model(const std::string& filepath);
+    Model(const std::string &filepath);
 
-    Model(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
+    Model(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices);
 
-    Model(Model&& rhs) noexcept;
+    Model(Model &&rhs) noexcept;
 
     virtual ~Model();
 
@@ -29,9 +30,11 @@ public:
 
     BoundingBox getBoundingBox() const;
 
-    bool checkBoundingBox(const glm::vec3 &point) const;// judge whether in the bounding box
+    void computeBoundingBox();
 
-    bool checkBoundingBall(const glm::vec3 &point) const;// judge whether in the bounding ball
+    bool checkBoundingBox(const glm::vec3 &point) const; // judge whether in the bounding box
+
+    bool checkBoundingBall(const glm::vec3 &point) const; // judge whether in the bounding ball
 
     virtual void draw() const;
 
@@ -53,8 +56,6 @@ protected:
     GLuint _boxVao = 0;
     GLuint _boxVbo = 0;
     GLuint _boxEbo = 0;
-
-    void computeBoundingBox();
 
     void initGLResources();
 

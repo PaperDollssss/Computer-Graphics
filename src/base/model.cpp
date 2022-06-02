@@ -181,6 +181,7 @@ void Model::computeBoundingBox()
 
   for (const auto &v : _vertices)
   {
+
     minX = std::min(v.position.x, minX);
     minY = std::min(v.position.y, minY);
     minZ = std::min(v.position.z, minZ);
@@ -191,6 +192,9 @@ void Model::computeBoundingBox()
 
   _boundingBox.min = glm::vec3(minX, minY, minZ);
   _boundingBox.max = glm::vec3(maxX, maxY, maxZ);
+
+  _boundingBox.min = glm::vec3((getModelMatrix() * glm::vec4(_boundingBox.min, 1.0f)).x, (getModelMatrix() * glm::vec4(_boundingBox.min, 1.0f)).y, (getModelMatrix() * glm::vec4(_boundingBox.min, 1.0f)).z);
+  _boundingBox.max = glm::vec3((getModelMatrix() * glm::vec4(_boundingBox.max, 1.0f)).x, (getModelMatrix() * glm::vec4(_boundingBox.max, 1.0f)).y, (getModelMatrix() * glm::vec4(_boundingBox.max, 1.0f)).z);
 }
 
 void Model::initBoxGLResources()
@@ -269,6 +273,8 @@ void Model::cleanup()
 
 bool Model::checkBoundingBox(const glm::vec3 &point) const
 {
+  // std::cout << "cube min: " << _boundingBox.min.x << " " << _boundingBox.min.y << " " << _boundingBox.min.z << std::endl;
+  // std::cout << "cube max: " << _boundingBox.max.x << " " << _boundingBox.max.y << " " << _boundingBox.max.z << std::endl;
   if (point.x < _boundingBox.min.x)
     return false;
   if (point.y < _boundingBox.min.y)
