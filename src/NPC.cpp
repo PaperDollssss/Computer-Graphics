@@ -4,18 +4,25 @@
 
 #include "NPC.h"
 #include <iostream>
-npc::npc() {
+npc::npc()
+{
   index = 0;
   count = 0;
-  for (int i = 0; i <= 100; i++) {
-    std::string filePath = "../../media/postures/pose";
-    if (count < 10) {
+  for (int i = 0; i <= 100; i++)
+  {
+    std::string filePath = "../media/postures/pose";
+    if (count < 10)
+    {
       filePath += "00";
       filePath += std::to_string(count);
-    } else if (count < 100) {
+    }
+    else if (count < 100)
+    {
       filePath += "0";
       filePath += std::to_string(count);
-    } else {
+    }
+    else
+    {
       filePath += std::to_string(count);
     }
     filePath += ".obj";
@@ -31,7 +38,8 @@ npc::npc() {
   }
 }
 
-std::shared_ptr<Model> npc::changeModel() {
+std::shared_ptr<Model> npc::changeModel()
+{
   std::shared_ptr<Model> curNPC = _npcVector[index];
   if (index < 100)
     index++;

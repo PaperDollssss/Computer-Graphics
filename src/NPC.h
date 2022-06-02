@@ -9,7 +9,8 @@
 #include <string>
 #include <vector>
 
-class npc {
+class npc
+{
 public:
   npc();
   std::shared_ptr<Model> changeModel();
