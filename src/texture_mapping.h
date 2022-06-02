@@ -68,6 +68,7 @@ private:
   std::unique_ptr<Model> _cylinder;
   std::unique_ptr<Model> _roundtable;
   std::unique_ptr<Model> _maze;
+  std::unique_ptr<Model> _ground;
   std::unique_ptr<Model> _newsphere;
   // npc NPC;
 

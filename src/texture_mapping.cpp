@@ -45,6 +45,11 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   _maze->position = glm::vec3(-10.0f, -15.0f, 0.0f);
   _maze->computeBoundingBox();
 
+  _ground.reset(new Model(modelPath3));
+  _ground->scale = glm::vec3(5.0f, 5.0f, 5.0f);
+  _ground->position = glm::vec3(10.0f, 0.0f, 0.0f);
+  _ground->computeBoundingBox();
+
   _cube.reset(new Model(cubeVertices, cubeIndices));
   _cube->scale = glm::vec3(1.0f, 1.0f, 1.0f);
   _cube->position = glm::vec3(10.0f, -5.0f, 0.0f);
@@ -407,7 +412,8 @@ void TextureMapping::renderFrame()
     // curNPC->draw();
     _shader->setMat4("model", _maze->getModelMatrix());
     _maze->draw();
-
+    _shader->setMat4("model", _ground->getModelMatrix());
+    _ground->draw();
     // 3. enable textures and transform textures to gpu
     glActiveTexture(GL_TEXTURE0);
     _simpleMaterial->mapKd->bind();
@@ -425,8 +431,10 @@ void TextureMapping::renderFrame()
     _bunny->draw();
     _blendShader->setMat4("model", _cube->getModelMatrix());
     _cube->draw();
-    _blendShader->setMat4("maze", _maze->getModelMatrix());
+    _blendShader->setMat4("model", _maze->getModelMatrix());
     _maze->draw();
+    _blendShader->setMat4("model", _ground->getModelMatrix());
+    _ground->draw();
     _blendShader->setMat4("model", _newsphere->getModelMatrix());
     _newsphere->draw();
     // 3. transfer light attributes to gpu
