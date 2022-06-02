@@ -41,7 +41,7 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   _bunny->computeBoundingBox();
 
   _maze.reset(new Model(modelPath2));
-  _maze->scale = glm::vec3(0.05f, 0.05f, 0.05f);
+  _maze->scale = glm::vec3(5.0f, 5.0f, 5.0f);
   _maze->position = glm::vec3(-10.0f, -15.0f, 0.0f);
   _maze->computeBoundingBox();
 
