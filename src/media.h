@@ -6,6 +6,8 @@ const std::string modelPath = "../media/sphere.obj";
 const std::string modelPath1 = "../media/tyra.obj";
 const std::string modelPath2 = "../media/untitled.obj";
 const std::string modelPath3 = "../media/ground.obj";
+const std::string modelPath4 = "../media/door.obj";
+
 
 
 const std::string earthTexturePath = "../media/earthmap.jpg";

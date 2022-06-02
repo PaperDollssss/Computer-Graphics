@@ -20,6 +20,8 @@ std::vector<GLuint> newsphereIndices;
 
 int _amount = 0;
 float xd = -1.0, yd = 1.0;
+bool knock = true;
+bool knocky = false;
 
 TextureMapping::TextureMapping(const Options &options) : Application(options)
 {
@@ -49,6 +51,11 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   _ground->scale = glm::vec3(5.0f, 5.0f, 5.0f);
   _ground->position = glm::vec3(10.0f, 0.0f, 0.0f);
   _ground->computeBoundingBox();
+
+  _door.reset(new Model(modelPath4));
+  _door->scale = glm::vec3(0.05f, 0.05f, 0.05f);
+  _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
+  _door->computeBoundingBox();
 
   _cube.reset(new Model(cubeVertices, cubeIndices));
   _cube->scale = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -265,6 +272,17 @@ void TextureMapping::handleInput()
   {
     SaveScreenShot(_windowWidth, _windowHeight);
   }
+
+  if (_keyboardInput.keyStates[GLFW_KEY_K] != GLFW_RELEASE)
+  {
+      knocky = true;
+  }
+  if (knocky == true && _keyboardInput.keyStates[GLFW_KEY_K] == GLFW_RELEASE)
+  {
+      knock = !knock;
+      knocky = false;
+  }
+
   if (_keyboardInput.keyStates[GLFW_KEY_ENTER] != GLFW_RELEASE)
   {
     YES = true;
@@ -414,6 +432,12 @@ void TextureMapping::renderFrame()
     _maze->draw();
     _shader->setMat4("model", _ground->getModelMatrix());
     _ground->draw();
+    if (knock == true)
+        _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
+    else
+        _door->position = glm::vec3(2.0f, 1.0f, 2.0f);
+    _shader->setMat4("model", _door->getModelMatrix());
+    _door->draw();
     // 3. enable textures and transform textures to gpu
     glActiveTexture(GL_TEXTURE0);
     _simpleMaterial->mapKd->bind();
@@ -435,6 +459,12 @@ void TextureMapping::renderFrame()
     _maze->draw();
     _blendShader->setMat4("model", _ground->getModelMatrix());
     _ground->draw();
+    if (knock == true)
+        _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
+    else
+        _door->position = glm::vec3(2.0f, 1.0f, 2.0f);
+    _blendShader->setMat4("model", _door->getModelMatrix());
+    _door->draw();
     _blendShader->setMat4("model", _newsphere->getModelMatrix());
     _newsphere->draw();
     // 3. transfer light attributes to gpu
