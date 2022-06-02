@@ -71,6 +71,11 @@ private:
   std::unique_ptr<Model> _ground;
   std::unique_ptr<Model> _door;
   std::unique_ptr<Model> _newsphere;
+  std::unique_ptr<Model> _arms;
+  std::unique_ptr<Model> _arml;
+  std::unique_ptr<Model> _armr;
+
+
   // npc NPC;
 
   std::unique_ptr<SimpleMaterial> _simpleMaterial;

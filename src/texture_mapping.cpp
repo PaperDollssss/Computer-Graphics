@@ -57,6 +57,18 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
   _door->computeBoundingBox();
 
+  _arms.reset(new Model(modelPath5));
+  _arms->scale = glm::vec3(3.0f, 3.0f, 3.0f);
+  _arms->computeBoundingBox();
+
+  _arml.reset(new Model(modelPath6));
+  _arml->scale = glm::vec3(3.0f, 3.0f, 3.0f);
+  _arml->computeBoundingBox();
+
+  _armr.reset(new Model(modelPath7));
+  _armr->scale = glm::vec3(3.0f, 3.0f, 3.0f);
+  _armr->computeBoundingBox();
+
   _cube.reset(new Model(cubeVertices, cubeIndices));
   _cube->scale = glm::vec3(1.0f, 1.0f, 1.0f);
   _cube->position = glm::vec3(10.0f, -5.0f, 0.0f);
@@ -432,6 +444,15 @@ void TextureMapping::renderFrame()
     _maze->draw();
     _shader->setMat4("model", _ground->getModelMatrix());
     _ground->draw();
+    _arml->position = _camera->position;
+    _arml->rotation = -_camera->rotation;
+    _shader->setMat4("model", _arml->getModelMatrix());
+    _arml->draw();
+    _armr->position = _camera->position;
+    _armr->rotation = -_camera->rotation;
+    _shader->setMat4("model", _armr->getModelMatrix());
+    _armr->draw();
+
     if (knock == true)
         _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
     else
