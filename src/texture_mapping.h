@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <windows.h>
 
 #include "base/application.h"
 #include "base/camera.h"
@@ -13,25 +14,41 @@
 
 #include "NPC.h"
 #include "genBaseElements.h"
+#include "screenshot.h"
 
-enum class RenderMode { Simple, Blend, Checker };
+enum class RenderMode
+{
+  Simple,
+  Blend,
+  Checker
+};
 
-struct SimpleMaterial {
+struct SimpleMaterial
+{
   std::shared_ptr<Texture2D> mapKd;
 };
 
-struct BlendMaterial {
+struct BlendMaterial
+{
   glm::vec3 kds[2];
   std::shared_ptr<Texture2D> mapKds[2];
   float blend;
 };
 
-struct CheckerMaterial {
+struct CheckerMaterial
+{
   int repeat;
   glm::vec3 colors[2];
 };
 
-class TextureMapping : public Application {
+struct LineMaterial
+{
+  glm::vec3 color;
+  float width;
+};
+
+class TextureMapping : public Application
+{
 public:
   TextureMapping(const Options &options);
 
@@ -51,8 +68,9 @@ private:
   std::unique_ptr<Model> _cylinder;
   std::unique_ptr<Model> _roundtable;
   std::unique_ptr<Model> _maze;
+  std::unique_ptr<Model> _ground;
   std::unique_ptr<Model> _newsphere;
-  npc NPC;
+  // npc NPC;
 
   std::unique_ptr<SimpleMaterial> _simpleMaterial;
   std::unique_ptr<BlendMaterial> _blendMaterial;
@@ -60,6 +78,10 @@ private:
 
   std::unique_ptr<PerspectiveCamera> _camera;
   std::unique_ptr<DirectionalLight> _light;
+
+  std::unique_ptr<LineMaterial> _lineMaterial;
+  std::unique_ptr<GLSLProgram> _lineShader;
+  std::unique_ptr<GLSLProgram> _lineInstancedShader;
 
   std::unique_ptr<GLSLProgram> _instancedShader;
   std::unique_ptr<GLSLProgram> _shader;
@@ -86,4 +108,6 @@ private:
   void renderFrame() override;
 
   std::vector<glm::mat4> _modelMatrices;
+
+  bool checkBounding(const glm::vec3 &position);
 };

@@ -138,6 +138,32 @@ void TextureMapping::initSimpleShader() {
   _simpleShader->attachVertexShader(vsCode);
   _simpleShader->attachFragmentShader(fsCode);
   _simpleShader->link();
+
+  const char *lineVsCode =
+      "#version 330 core\n"
+      "layout(location = 0) in vec3 aPosition;\n"
+      "uniform mat4 projection;\n"
+      "uniform mat4 view;\n"
+      "uniform mat4 model;\n"
+      "void main() {\n"
+      "	gl_Position = projection * view * model * vec4(aPosition, 1.0f);\n"
+      "}\n";
+
+  const char *lineFsCode =
+      "#version 330 core\n"
+      "out vec4 color;\n"
+      "struct Material {\n"
+      "	vec3 color;\n"
+      "};\n"
+      "uniform Material material;\n"
+      "void main() { \n"
+      "	color = vec4(material.color, 1.0f);\n"
+      "}\n";
+
+  _lineShader.reset(new GLSLProgram);
+  _lineShader->attachVertexShader(lineVsCode);
+  _lineShader->attachFragmentShader(lineFsCode);
+  _lineShader->link();
 }
 
 void TextureMapping::initBlendShader() {
