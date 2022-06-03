@@ -57,6 +57,7 @@ public:
 private:
   int cursorvisible = 0;
   bool YES = false;
+  bool boundingmode;
   double timet = 0.0;
   float OrbitRadius = 10.0f;
   float OrbitX = 0, OrbitZ = OrbitRadius;

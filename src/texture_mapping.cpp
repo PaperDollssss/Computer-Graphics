@@ -22,7 +22,7 @@ int _amount = 0;
 float xd = -1.0, yd = 1.0;
 bool knock = true;
 bool knocky = false;
-const glm::mat4 view1;
+glm::mat4 view1;
 
 TextureMapping::TextureMapping(const Options &options) : Application(options)
 {
@@ -47,6 +47,7 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   _maze->scale = glm::vec3(5.0f, 5.0f, 5.0f);
   _maze->position = glm::vec3(-10.0f, -15.0f, 0.0f);
   _maze->computeBoundingBox();
+  _maze->computeInBoundingBox();
 
   _ground.reset(new Model(modelPath3));
   _ground->scale = glm::vec3(5.0f, 5.0f, 5.0f);
@@ -75,6 +76,28 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   _bear->position = glm::vec3(-3.0f, -10.0f, 10.0f);
   _bear->computeBoundingBox();
 
+  _ground.reset(new Model(modelPath3));
+  _ground->scale = glm::vec3(5.0f, 5.0f, 5.0f);
+  _ground->position = glm::vec3(10.0f, 0.0f, 0.0f);
+  _ground->computeBoundingBox();
+
+  _door.reset(new Model(modelPath4));
+  _door->scale = glm::vec3(0.05f, 0.05f, 0.05f);
+  _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
+  _door->computeBoundingBox();
+
+  _arms.reset(new Model(modelPath5));
+  _arms->scale = glm::vec3(3.0f, 3.0f, 3.0f);
+  _arms->computeBoundingBox();
+
+  _arml.reset(new Model(modelPath6));
+  _arml->scale = glm::vec3(3.0f, 3.0f, 3.0f);
+  _arml->computeBoundingBox();
+
+  _armr.reset(new Model(modelPath7));
+  _armr->scale = glm::vec3(3.0f, 3.0f, 3.0f);
+  _armr->computeBoundingBox();
+
   _cube.reset(new Model(cubeVertices, cubeIndices));
   _cube->scale = glm::vec3(1.0f, 1.0f, 1.0f);
   _cube->position = glm::vec3(10.0f, -5.0f, 0.0f);
@@ -99,6 +122,7 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   _newsphere->scale = glm::vec3(2.0f, 2.0f, 2.0f);
   _newsphere->position = glm::vec3(40.0f, 5.0f, 0.0f);
   _newsphere->computeBoundingBox();
+  _newsphere->computeInBoundingBox();
 
   // init textures
   std::shared_ptr<Texture2D> earthTexture =
@@ -161,6 +185,9 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   ImGui::StyleColorsDark();
   ImGui_ImplGlfw_InitForOpenGL(_window, true);
   ImGui_ImplOpenGL3_Init();
+
+  // init bounding mode
+  boundingmode = true;
 }
 
 TextureMapping::~TextureMapping()
@@ -173,18 +200,17 @@ TextureMapping::~TextureMapping()
 void TextureMapping::handleInput()
 {
 
-
-    double t, k, y = 0;
-    t = (float)glfwGetTime();
-    k = (int)t % 8 + t - (int)t;
-    if (k >= 0 && k < 2)
-        y = (int)t % 2 + t - (int)t;
-    else if (k >= 2 && k < 4)
-        y = 2 - ((int)t % 2 + t - (int)t);
-    else if (k >= 4 && k < 6)
-        y = -((int)t % 2 + t - (int)t);
-    else
-        y = ((int)t % 2 + t - (int)t) - 2;
+  double t, k, y = 0;
+  t = (float)glfwGetTime();
+  k = (int)t % 8 + t - (int)t;
+  if (k >= 0 && k < 2)
+    y = (int)t % 2 + t - (int)t;
+  else if (k >= 2 && k < 4)
+    y = 2 - ((int)t % 2 + t - (int)t);
+  else if (k >= 4 && k < 6)
+    y = -((int)t % 2 + t - (int)t);
+  else
+    y = ((int)t % 2 + t - (int)t) - 2;
 
   bool firstMouse = true;
   const float angluarVelocity = 0.1f;
@@ -196,7 +222,6 @@ void TextureMapping::handleInput()
   _sphere->rotation = glm::angleAxis(angle, axis) * _sphere->rotation;
   _arml->rotation = _camera->rotation * glm::angleAxis(anglel, axis);
   _armr->rotation = _camera->rotation * glm::angleAxis(angler, axis);
-
 
   constexpr float cameraMoveSpeed = 0.05f;
   constexpr float cameraRotateSpeed = 0.02f;
@@ -269,42 +294,54 @@ void TextureMapping::handleInput()
     //_camera->position += cameraPos;
     _camera->position = glm::vec3(OrbitX, _camera->position.y, OrbitZ);
   }
+
   if (_keyboardInput.keyStates[GLFW_KEY_W] != GLFW_RELEASE)
   {
     cameraPos = cameraMoveSpeed * _camera->getFront();
-    if (!checkBounding(_camera->position + cameraPos))
-      _camera->position += cameraPos;
-    std::cout << "camera: " << _camera->position.x << " " << _camera->position.y << " " << _camera->position.z << std::endl;
+    _camera->position += cameraPos;
+
+    if (checkBounding(_camera->position + 10.0f * cameraPos))
+      _camera->position -= cameraPos;
   }
   if (_keyboardInput.keyStates[GLFW_KEY_D] != GLFW_RELEASE)
   {
     cameraPos = _camera->getRight() * cameraMoveSpeed;
-    if (!checkBounding(_camera->position + cameraPos))
-      _camera->position += cameraPos;
+    _camera->position += cameraPos;
+
+    if (checkBounding(_camera->position + 10.0f * cameraPos))
+      _camera->position -= cameraPos;
   }
   if (_keyboardInput.keyStates[GLFW_KEY_S] != GLFW_RELEASE)
   {
     cameraPos = cameraMoveSpeed * _camera->getFront();
-    if (!checkBounding(_camera->position - cameraPos))
-      _camera->position -= cameraPos;
+    _camera->position -= cameraPos;
+
+    if (checkBounding(_camera->position - 10.0f * cameraPos))
+      _camera->position += cameraPos;
   }
   if (_keyboardInput.keyStates[GLFW_KEY_A] != GLFW_RELEASE)
   {
     cameraPos = _camera->getRight() * cameraMoveSpeed;
-    if (!checkBounding(_camera->position - cameraPos))
-      _camera->position -= cameraPos;
+    _camera->position -= cameraPos;
+
+    if (checkBounding(_camera->position - 10.0f * cameraPos))
+      _camera->position += cameraPos;
   }
   if (_keyboardInput.keyStates[GLFW_KEY_E] != GLFW_RELEASE)
   {
     cameraPos = cameraMoveSpeed * cameraUp;
-    if (!checkBounding(_camera->position - cameraPos))
-      _camera->position -= cameraPos;
+    _camera->position -= cameraPos;
+
+    if (checkBounding(_camera->position - 10.0f * cameraPos))
+      _camera->position += cameraPos;
   }
   if (_keyboardInput.keyStates[GLFW_KEY_Q] != GLFW_RELEASE)
   {
     cameraPos = cameraMoveSpeed * cameraUp;
-    if (!checkBounding(_camera->position + cameraPos))
-      _camera->position += cameraPos;
+    _camera->position += cameraPos;
+
+    if (checkBounding(_camera->position + 10.0f * cameraPos))
+      _camera->position -= cameraPos;
   }
 
   if (_keyboardInput.keyStates[GLFW_KEY_P] != GLFW_RELEASE)
@@ -314,12 +351,12 @@ void TextureMapping::handleInput()
 
   if (_keyboardInput.keyStates[GLFW_KEY_K] != GLFW_RELEASE)
   {
-      knocky = true;
+    knocky = true;
   }
   if (knocky == true && _keyboardInput.keyStates[GLFW_KEY_K] == GLFW_RELEASE)
   {
-      knock = !knock;
-      knocky = false;
+    knock = !knock;
+    knocky = false;
   }
 
   if (_keyboardInput.keyStates[GLFW_KEY_ENTER] != GLFW_RELEASE)
@@ -409,9 +446,6 @@ void TextureMapping::renderFrame()
   const glm::mat4 view = _camera->getViewMatrix();
   glm::mat4 view1 = _camera->getViewMatrix();
 
-
-
-
   double t, k, y = 0;
   t = (float)glfwGetTime();
   k = (int)t % 8 + t - (int)t;
@@ -478,9 +512,9 @@ void TextureMapping::renderFrame()
     _bear->draw();
 
     if (knock == true)
-        _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
+      _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
     else
-        _door->position = glm::vec3(2.0f, 1.0f, 2.0f);
+      _door->position = glm::vec3(2.0f, 1.0f, 2.0f);
     _shader->setMat4("model", _door->getModelMatrix());
     _door->draw();
     glActiveTexture(GL_TEXTURE0);
@@ -502,9 +536,9 @@ void TextureMapping::renderFrame()
     _blendShader->setMat4("model", _ground->getModelMatrix());
     _ground->draw();
     if (knock == true)
-        _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
+      _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
     else
-        _door->position = glm::vec3(2.0f, 1.0f, 2.0f);
+      _door->position = glm::vec3(2.0f, 1.0f, 2.0f);
     _blendShader->setMat4("model", _door->getModelMatrix());
     _door->draw();
     _blendShader->setMat4("model", _newsphere->getModelMatrix());
@@ -591,6 +625,7 @@ void TextureMapping::renderFrame()
     ImGui::ColorEdit3("color1", (float *)&_checkerMaterial->colors[0]);
     ImGui::ColorEdit3("color2", (float *)&_checkerMaterial->colors[1]);
     ImGui::Checkbox("wireframe", &wireframe);
+    ImGui::Checkbox("boundingbox", &boundingmode);
     ImGui::NewLine();
 
     ImGui::Text("Directional light");
@@ -600,11 +635,6 @@ void TextureMapping::renderFrame()
     ImGui::SliderFloat("yd", &yd, -2.0f, 2.0f);
     ImGui::ColorEdit3("color", (float *)&_light->color);
     ImGui::NewLine();
-
-    // ImGui::Separator();
-    // ImGui::RadioButton("Show bounding Box", (int *)&_renderMode,
-    //                    (int)(RenderMode::Simple));
-    // ImGui::NewLine();
 
     ImGui::End();
   }
@@ -621,9 +651,9 @@ bool TextureMapping::checkBounding(const glm::vec3 &positon)
     return true;
   if (_roundtable->checkBoundingBox(positon))
     return true;
-  if (_maze->checkBoundingBox(positon))
+  if (_maze->checkInBoundingBox(positon))
     return true;
-  if (_newsphere->checkBoundingBall(positon))
+  if (_newsphere->checkInBoundingBox(positon))
     return true;
   // if (NPC.changeModel()->checkBoundingBox(positon))
   //   return true;
