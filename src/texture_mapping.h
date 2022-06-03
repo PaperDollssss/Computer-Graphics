@@ -18,8 +18,8 @@
 
 enum class RenderMode
 {
-  Simple,
-  Blend,
+  Game,
+  Show,
   Checker
 };
 
@@ -57,6 +57,7 @@ public:
 private:
   int cursorvisible = 0;
   bool YES = false;
+  bool boundingmode;
   double timet = 0.0;
   float OrbitRadius = 10.0f;
   float OrbitX = 0, OrbitZ = OrbitRadius;
@@ -68,9 +69,14 @@ private:
   std::unique_ptr<Model> _cylinder;
   std::unique_ptr<Model> _roundtable;
   std::unique_ptr<Model> _maze;
-  std::unique_ptr<Model> _ground;
+  std::unique_ptr<Model> _door;
   std::unique_ptr<Model> _newsphere;
-  npc NPC;
+  std::unique_ptr<Model> _arml;
+  std::unique_ptr<Model> _armr;
+  std::unique_ptr<Model> _bear;
+
+
+  // npc NPC;
 
   std::unique_ptr<SimpleMaterial> _simpleMaterial;
   std::unique_ptr<BlendMaterial> _blendMaterial;
@@ -91,7 +97,7 @@ private:
 
   std::unique_ptr<SkyBox> _skybox;
 
-  enum RenderMode _renderMode = RenderMode::Simple;
+  enum RenderMode _renderMode = RenderMode::Game;
 
   void initInstancedShader();
 

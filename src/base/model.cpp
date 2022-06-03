@@ -192,7 +192,6 @@ void Model::computeBoundingBox()
 
   for (const auto &v : _vertices)
   {
-
     minX = std::min(v.position.x, minX);
     minY = std::min(v.position.y, minY);
     minZ = std::min(v.position.z, minZ);
@@ -284,27 +283,25 @@ void Model::cleanup()
 
 bool Model::checkBoundingBox(const glm::vec3 &point) const
 {
-  // std::cout << "cube min: " << _boundingBox.min.x << " " << _boundingBox.min.y << " " << _boundingBox.min.z << std::endl;
-  // std::cout << "cube max: " << _boundingBox.max.x << " " << _boundingBox.max.y << " " << _boundingBox.max.z << std::endl;
-  if (point.x < _boundingBox.min.x)
+  if (point.x < _boundingBox.min.x )
     return false;
-  if (point.y < _boundingBox.min.y)
+  if (point.y < _boundingBox.min.y )
     return false;
-  if (point.z < _boundingBox.min.z)
+  if (point.z < _boundingBox.min.z )
     return false;
-  if (point.x > _boundingBox.max.x)
+  if (point.x > _boundingBox.max.x )
     return false;
-  if (point.y > _boundingBox.max.y)
+  if (point.y > _boundingBox.max.y )
     return false;
-  if (point.z > _boundingBox.max.z)
+  if (point.z > _boundingBox.max.z )
     return false;
   return true;
 }
 
 bool Model::checkBoundingBall(const glm::vec3 &point) const
 {
-  // sphereRadius = 5
-  if (sqrt(pow((point.x - position.x), 2) + pow((point.y - position.y), 2) + pow((point.z - position.z), 2)) > 5)
+  // sphereRadius = 5 * 2
+  if (sqrt(pow((point.x - position.x), 2) + pow((point.y - position.y), 2) + pow((point.z - position.z), 2)) > 10)
     return false;
   else
     return true;
@@ -366,4 +363,21 @@ bool ExportObj(Model *inputModel)
     count++;
   }
   return true;
+}
+void Model::computeInBoundingBox()
+{
+  tmaxdepth = cal(4);
+  txm = (_boundingBox.max.x - _boundingBox.min.x) / tmaxdepth;
+  tym = (_boundingBox.max.y - _boundingBox.min.y) / tmaxdepth;
+  tzm = (_boundingBox.max.z - _boundingBox.min.z) / tmaxdepth;
+  createOctree(rootNode, 4, _boundingBox.min.x, _boundingBox.max.x, _boundingBox.min.y, _boundingBox.max.y, _boundingBox.min.z, _boundingBox.max.z);
+  for (const auto &v : _vertices)
+  {
+    glm::vec3 w= glm::vec3((getModelMatrix() * glm::vec4(v.position, 1.0f)).x, (getModelMatrix() * glm::vec4(v.position, 1.0f)).y, (getModelMatrix() * glm::vec4(v.position, 1.0f)).z);
+    compute(rootNode, w.x, w.y, w.z);
+  }
+}
+bool Model::checkInBoundingBox(const glm::vec3 &point)
+{
+  return find(rootNode, point.x, point.y, point.z);
 }
