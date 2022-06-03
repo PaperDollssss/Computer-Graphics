@@ -18,6 +18,8 @@ std::vector<GLuint> roundtableIndices;
 std::vector<Vertex> newsphereVertices;
 std::vector<GLuint> newsphereIndices;
 
+bool importFlag = 0;
+Model *inputModel;
 int _amount = 0;
 float xd = -1.0, yd = 1.0;
 bool knock = true;
@@ -37,11 +39,6 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   _sphere->scale = glm::vec3(3.0f, 3.0f, 3.0f);
   _sphere->position = glm::vec3(-10.0f, 5.0f, 0.0f);
   _sphere->computeBoundingBox();
-
-  _bunny.reset(new Model(modelPath1));
-  _bunny->scale = glm::vec3(1.0f, 1.0f, 1.0f);
-  _bunny->position = glm::vec3(10.0f, 5.0f, 0.0f);
-  _bunny->computeBoundingBox();
 
   _maze.reset(new Model(modelPath2));
   _maze->scale = glm::vec3(5.0f, 5.0f, 5.0f);
@@ -328,7 +325,7 @@ void TextureMapping::handleInput()
 
   if (_keyboardInput.keyStates[GLFW_KEY_P] != GLFW_RELEASE)
   {
-    SaveScreenShot(_windowWidth, _windowHeight);
+    // SaveScreenShot(_windowWidth, _windowHeight);
   }
 
   if (_keyboardInput.keyStates[GLFW_KEY_K] != GLFW_RELEASE)
@@ -440,7 +437,7 @@ void TextureMapping::renderFrame()
   else
     y = 2 - ((int)t % 2 + t - (int)t);
 
-  // std::shared_ptr<Model> curNPC = NPC.changeModel();
+  std::shared_ptr<Model> curNPC = NPC.changeModel();
 
   // draw planet
   switch (_renderMode)
@@ -508,9 +505,12 @@ void TextureMapping::renderFrame()
     _blendShader->setMat4("view", view);
     _blendShader->setMat4("model", _sphere->getModelMatrix());
     _sphere->draw();
-    _bunny->scale = glm::vec3(y + 0.3, y + 0.3, y + 0.3);
-    _blendShader->setMat4("model", _bunny->getModelMatrix());
-    _bunny->draw();
+    if (importFlag)
+    {
+      _bunny->scale = glm::vec3(y + 0.3, y + 0.3, y + 0.3);
+      _blendShader->setMat4("model", _bunny->getModelMatrix());
+      _bunny->draw();
+    }
     _blendShader->setMat4("model", _cube->getModelMatrix());
     _cube->draw();
     _blendShader->setMat4("model", _cone->getModelMatrix());
@@ -563,6 +563,12 @@ void TextureMapping::renderFrame()
     _checkerShader->setMat4("view", view);
     _checkerShader->setMat4("model", _sphere->getModelMatrix());
     _sphere->draw();
+    if (importFlag)
+    {
+      _bunny->scale = glm::vec3(y + 0.3, y + 0.3, y + 0.3);
+      _checkerShader->setMat4("model", _bunny->getModelMatrix());
+      _bunny->draw();
+    }
     _checkerShader->setMat4("model", _cube->getModelMatrix());
     _cube->draw();
     _checkerShader->setInt("material.repeat", _checkerMaterial->repeat);
@@ -576,8 +582,11 @@ void TextureMapping::renderFrame()
   _lineShader->setMat4("view", view);
   _lineShader->setVec3("material.color", _lineMaterial->color);
 
-  _lineShader->setMat4("model", _bunny->getModelMatrix());
-  _bunny->drawBoundingBox();
+  if (importFlag)
+  {
+    _lineShader->setMat4("model", _bunny->getModelMatrix());
+    _bunny->drawBoundingBox();
+  }
   _lineShader->setMat4("model", _roundtable->getModelMatrix());
   _roundtable->drawBoundingBox();
   _lineShader->setMat4("model", _newsphere->getModelMatrix());
@@ -626,7 +635,7 @@ void TextureMapping::renderFrame()
     ImGui::Checkbox("boundingbox", &boundingmode);
     ImGui::NewLine();
 
-    ImGui::Text("Directional light");
+    ImGui::Text("Directional Light");
     ImGui::Separator();
     ImGui::SliderFloat("intensity", &_light->intensity, 0.0f, 2.0f);
     ImGui::SliderFloat("xd", &xd, -2.0f, 2.0f);
@@ -646,6 +655,26 @@ void TextureMapping::renderFrame()
     ImGui::ColorEdit3("color##3", (float*)&_spotLight->color);
     ImGui::SliderFloat("angle##3", (float*)&_spotLight->angle, 0.0f, glm::radians(180.0f), "%f rad");
     ImGui::NewLine();
+
+    // ImGui::Separator();
+    // ImGui::RadioButton("Show bounding Box", (int *)&_renderMode,
+    //                    (int)(RenderMode::Simple));
+    // ImGui::NewLine();
+    ImGui::Text("OBJ Export");
+    if (ImGui::Button("Import"))
+    {
+      importFlag = 1;
+      inputModel = new Model(modelPath1);
+      _bunny.reset(inputModel);
+      _bunny->scale = glm::vec3(1.0f, 1.0f, 1.0f);
+      _bunny->position = glm::vec3(10.0f, 5.0f, 0.0f);
+      _bunny->computeBoundingBox();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Export"))
+    {
+      bool flag = ExportObj(inputModel);
+    }
 
     ImGui::End();
   }

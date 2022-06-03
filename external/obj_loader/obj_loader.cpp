@@ -12,6 +12,7 @@ namespace obj
   typedef struct
   {
     int p_index;
+    int t_index;
     int n_index;
   } vertex;
 
@@ -107,7 +108,7 @@ namespace obj
           {
             size_t pos1, pos2;
             vertex vert;
-            std::string index_v, index_vn, str, sub;
+            std::string index_v, index_vt, index_vn, str, sub;
             if (i == 0)
               str = tmp1;
             else
@@ -122,8 +123,10 @@ namespace obj
             index_v = str.substr(0, pos1);
             sub = str.substr(pos1 + 1);
             pos2 = sub.find_first_of('/');
+            index_vt = str.substr(pos1 + 1, pos2);
             index_vn = sub.substr(pos2 + 1);
             vert.p_index = std::stoi(index_v) - 1;
+            vert.t_index = std::stoi(index_vt) - 1;
             vert.n_index = std::stoi(index_vn) - 1;
             face.push_back(vert);
           }
@@ -156,6 +159,7 @@ namespace obj
       shapes.push_back(shape);
     faces.clear();
     _attrib.vertices.swap(v);
+    _attrib.texts.swap(vt);
     _attrib.norms.swap(vn);
     return true;
   }
@@ -179,10 +183,13 @@ namespace obj
           index_o iv0, iv1, iv2;
           iv0.v_index = v0.p_index;
           iv0.n_index = v0.n_index;
+          iv0.t_index = v0.t_index;
           iv1.v_index = v1.p_index;
           iv1.n_index = v1.n_index;
+          iv1.t_index = v1.t_index;
           iv2.v_index = v2.p_index;
           iv2.n_index = v2.n_index;
+          iv2.t_index = v2.t_index;
 
           shape.mesh.indices.push_back(iv0);
           shape.mesh.indices.push_back(iv1);
@@ -198,6 +205,7 @@ namespace obj
           index_o iv;
           iv.v_index = face[k].p_index;
           iv.n_index = face[k].n_index;
+          iv.t_index = face[k].t_index;
           shape.mesh.indices.push_back(iv);
         }
         shape.mesh.num_face_vertices.push_back(n);

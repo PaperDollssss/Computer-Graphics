@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <fstream>
 
 #include <glad/glad.h>
 
@@ -39,6 +40,9 @@ public:
 
     bool checkBoundingBall(const glm::vec3 &point) const; // judge whether in the bounding ball
 
+    std::vector<Vertex> getVertices();
+
+    std::vector<uint32_t> getIndices();
     bool checkInBoundingBox(const glm::vec3 &point);
 
     virtual void draw() const;

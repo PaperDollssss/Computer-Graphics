@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <string>
-#include <windows.h>
+// #include <windows.h>
 
 #include "base/application.h"
 #include "base/camera.h"
