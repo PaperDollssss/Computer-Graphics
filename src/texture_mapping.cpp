@@ -20,6 +20,9 @@ std::vector<GLuint> newsphereIndices;
 
 int _amount = 0;
 float xd = -1.0, yd = 1.0;
+bool knock = true;
+bool knocky = false;
+glm::mat4 view1;
 
 TextureMapping::TextureMapping(const Options &options) : Application(options)
 {
@@ -46,6 +49,28 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   _maze->computeBoundingBox();
   _maze->computeInBoundingBox();
 
+  _ground.reset(new Model(modelPath3));
+  _ground->scale = glm::vec3(5.0f, 5.0f, 5.0f);
+  _ground->position = glm::vec3(10.0f, 0.0f, 0.0f);
+  _ground->computeBoundingBox();
+
+  _door.reset(new Model(modelPath4));
+  _door->scale = glm::vec3(0.05f, 0.05f, 0.05f);
+  _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
+  _door->computeBoundingBox();
+
+  _arms.reset(new Model(modelPath5));
+  _arms->scale = glm::vec3(3.0f, 3.0f, 3.0f);
+  _arms->computeBoundingBox();
+
+  _arml.reset(new Model(modelPath6));
+  _arml->scale = glm::vec3(3.0f, 3.0f, 3.0f);
+  _arml->computeBoundingBox();
+
+  _armr.reset(new Model(modelPath7));
+  _armr->scale = glm::vec3(3.0f, 3.0f, 3.0f);
+  _armr->computeBoundingBox();
+
   _cube.reset(new Model(cubeVertices, cubeIndices));
   _cube->scale = glm::vec3(1.0f, 1.0f, 1.0f);
   _cube->position = glm::vec3(10.0f, -5.0f, 0.0f);
@@ -71,7 +96,6 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   _newsphere->position = glm::vec3(40.0f, 5.0f, 0.0f);
   _newsphere->computeBoundingBox();
   _newsphere->computeInBoundingBox();
-
 
   // init textures
   std::shared_ptr<Texture2D> earthTexture =
@@ -148,11 +172,30 @@ TextureMapping::~TextureMapping()
 
 void TextureMapping::handleInput()
 {
+
+  double t, k, y = 0;
+  t = (float)glfwGetTime();
+  k = (int)t % 8 + t - (int)t;
+  if (k >= 0 && k < 2)
+    y = (int)t % 2 + t - (int)t;
+  else if (k >= 2 && k < 4)
+    y = 2 - ((int)t % 2 + t - (int)t);
+  else if (k >= 4 && k < 6)
+    y = -((int)t % 2 + t - (int)t);
+  else
+    y = ((int)t % 2 + t - (int)t) - 2;
+
   bool firstMouse = true;
   const float angluarVelocity = 0.1f;
   const float angle = angluarVelocity * static_cast<float>(_deltaTime);
-  const glm::vec3 axis = glm::vec3(0.0f, 1.0f, 0.0f);
+  const float anglel = 0.08 * y;
+  const float angler = -0.08 * y;
+  const glm::vec3 axis = _camera->getRight();
+
   _sphere->rotation = glm::angleAxis(angle, axis) * _sphere->rotation;
+  _arml->rotation = _camera->rotation * glm::angleAxis(anglel, axis);
+  _armr->rotation = _camera->rotation * glm::angleAxis(angler, axis);
+
   constexpr float cameraMoveSpeed = 0.05f;
   constexpr float cameraRotateSpeed = 0.02f;
   glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -279,6 +322,16 @@ void TextureMapping::handleInput()
     SaveScreenShot(_windowWidth, _windowHeight);
   }
 
+  if (_keyboardInput.keyStates[GLFW_KEY_K] != GLFW_RELEASE)
+  {
+    knocky = true;
+  }
+  if (knocky == true && _keyboardInput.keyStates[GLFW_KEY_K] == GLFW_RELEASE)
+  {
+    knock = !knock;
+    knocky = false;
+  }
+
   if (_keyboardInput.keyStates[GLFW_KEY_ENTER] != GLFW_RELEASE)
   {
     YES = true;
@@ -322,6 +375,7 @@ void TextureMapping::handleInput()
       camera->rotation =
           glm::quat{(float)cos(thetax / 2), (float)sin(thetax / 2) * right} *
           camera->rotation;
+      //_arml->rotation = camera->rotation;
       _mouseInput.move.xOld = _mouseInput.move.xCurrent;
     }
     if (_mouseInput.move.yCurrent != _mouseInput.move.yOld)
@@ -339,12 +393,12 @@ void TextureMapping::handleInput()
       camera->rotation =
           glm::quat{(float)cos(thetay / 2), (float)sin(thetay / 2) * up} *
           camera->rotation;
+      //_arml->rotation = camera->rotation;
       _mouseInput.move.yOld = _mouseInput.move.yCurrent;
     }
   }
   if (_mouseInput.scroll.y != 0)
   {
-    printf("%f\n", _camera->fovy);
     if (_camera->fovy >= 0.05f && _camera->fovy <= 2.8f)
       _camera->fovy -= 0.02 * _mouseInput.scroll.y;
     if (_camera->fovy <= 0.05f)
@@ -377,6 +431,7 @@ void TextureMapping::renderFrame()
 
   const glm::mat4 projection = _camera->getProjectionMatrix();
   const glm::mat4 view = _camera->getViewMatrix();
+  glm::mat4 view1 = _camera->getViewMatrix();
 
   double t, k, y = 0;
   t = (float)glfwGetTime();
@@ -426,6 +481,22 @@ void TextureMapping::renderFrame()
     // curNPC->draw();
     _shader->setMat4("model", _maze->getModelMatrix());
     _maze->draw();
+    _shader->setMat4("model", _ground->getModelMatrix());
+    _ground->draw();
+
+    _armr->position = _camera->position;
+    _shader->setMat4("model", _armr->getModelMatrix());
+    _armr->draw();
+    _arml->position = _camera->position;
+    _shader->setMat4("model", _arml->getModelMatrix());
+    _arml->draw();
+
+    if (knock == true)
+      _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
+    else
+      _door->position = glm::vec3(2.0f, 1.0f, 2.0f);
+    _shader->setMat4("model", _door->getModelMatrix());
+    _door->draw();
 
     // draw simple bounding box for test, can be deleted at the final
     if (boundingmode)
@@ -447,7 +518,6 @@ void TextureMapping::renderFrame()
       _maze->drawBoundingBox();
       glLineWidth(_lineMaterial->width);
     }
-
     // 3. enable textures and transform textures to gpu
     glActiveTexture(GL_TEXTURE0);
     _simpleMaterial->mapKd->bind();
@@ -465,8 +535,16 @@ void TextureMapping::renderFrame()
     _bunny->draw();
     _blendShader->setMat4("model", _cube->getModelMatrix());
     _cube->draw();
-    _blendShader->setMat4("maze", _maze->getModelMatrix());
+    _blendShader->setMat4("model", _maze->getModelMatrix());
     _maze->draw();
+    _blendShader->setMat4("model", _ground->getModelMatrix());
+    _ground->draw();
+    if (knock == true)
+      _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
+    else
+      _door->position = glm::vec3(2.0f, 1.0f, 2.0f);
+    _blendShader->setMat4("model", _door->getModelMatrix());
+    _door->draw();
     _blendShader->setMat4("model", _newsphere->getModelMatrix());
     _newsphere->draw();
     // 3. transfer light attributes to gpu
