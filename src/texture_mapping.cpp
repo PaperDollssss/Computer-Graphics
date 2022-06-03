@@ -147,6 +147,13 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   _light->rotation =
       glm::angleAxis(glm::radians(45.0f), -glm::vec3(1.0f, 1.0f, 1.0f));
 
+  _spotLight.reset(new SpotLight());
+  _spotLight->position = glm::vec3(0.0f, 0.0f, 5.0f);
+  _spotLight->rotation = glm::angleAxis(glm::radians(45.0f), -glm::vec3(1.0f, 1.0f, 1.0f));
+
+  _ambientLight.reset(new AmbientLight);
+
+
   // init shaders
   initSimpleShader();
   initBlendShader();
@@ -462,7 +469,6 @@ void TextureMapping::renderFrame()
                 _bear->position.z += 0.01 * (3.0 - (_bear->position.z - _camera->position.z));
 
         }
-    printf("%f,%f,%f", &_camera->position.x, &_camera->position.y, &_camera->position.z);
     _blendShader->setMat4("model", _bear->getModelMatrix());
     _bear->draw();
 
@@ -479,6 +485,17 @@ void TextureMapping::renderFrame()
     _blendShader->setVec3("material.kds[1]", _blendMaterial->kds[1]);
     _blendShader->setFloat("material.blend", _blendMaterial->blend);
 
+    _blendShader->setVec3("spotLight.position", _spotLight->position);
+    _blendShader->setVec3("spotLight.direction", _spotLight->getFront());
+    _blendShader->setFloat("spotLight.intensity", _spotLight->intensity);
+    _blendShader->setVec3("spotLight.color", _spotLight->color);
+    _blendShader->setFloat("spotLight.angle", _spotLight->angle);
+    _blendShader->setFloat("spotLight.kc", _spotLight->kc);
+    _blendShader->setFloat("spotLight.kl", _spotLight->kl);
+    _blendShader->setFloat("spotLight.kq", _spotLight->kq);
+
+    _blendShader->setVec3("ambientLight.color", _ambientLight->color);
+    _blendShader->setFloat("ambientLight.intensity", _ambientLight->intensity);
     glActiveTexture(GL_TEXTURE0);
     _blendMaterial->mapKds[0]->bind();
     glActiveTexture(GL_TEXTURE1);
@@ -521,6 +538,18 @@ void TextureMapping::renderFrame()
     _blendShader->setVec3("material.kds[0]", _blendMaterial->kds[0]);
     _blendShader->setVec3("material.kds[1]", _blendMaterial->kds[1]);
     _blendShader->setFloat("material.blend", _blendMaterial->blend);
+
+    _blendShader->setVec3("spotLight.position", _spotLight->position);
+    _blendShader->setVec3("spotLight.direction", _spotLight->getFront());
+    _blendShader->setFloat("spotLight.intensity", _spotLight->intensity);
+    _blendShader->setVec3("spotLight.color", _spotLight->color);
+    _blendShader->setFloat("spotLight.angle", _spotLight->angle);
+    _blendShader->setFloat("spotLight.kc", _spotLight->kc);
+    _blendShader->setFloat("spotLight.kl", _spotLight->kl);
+    _blendShader->setFloat("spotLight.kq", _spotLight->kq);
+
+    _blendShader->setVec3("ambientLight.color", _ambientLight->color);
+    _blendShader->setFloat("ambientLight.intensity", _ambientLight->intensity);
 
     glActiveTexture(GL_TEXTURE0);
     _blendMaterial->mapKds[0]->bind();
@@ -603,6 +632,19 @@ void TextureMapping::renderFrame()
     ImGui::SliderFloat("xd", &xd, -2.0f, 2.0f);
     ImGui::SliderFloat("yd", &yd, -2.0f, 2.0f);
     ImGui::ColorEdit3("color", (float *)&_light->color);
+    ImGui::NewLine();
+
+    ImGui::Text("Ambient light");
+    ImGui::Separator();
+    ImGui::SliderFloat("intensity##5", &_ambientLight->intensity, 0.0f, 10.0f);
+    ImGui::ColorEdit3("color##1", (float*)&_ambientLight->color);
+    ImGui::NewLine();
+
+    ImGui::Text("spot light");
+    ImGui::Separator();
+    ImGui::SliderFloat("intensity##3", &_spotLight->intensity, 0.0f, 1.5f);
+    ImGui::ColorEdit3("color##3", (float*)&_spotLight->color);
+    ImGui::SliderFloat("angle##3", (float*)&_spotLight->angle, 0.0f, glm::radians(180.0f), "%f rad");
     ImGui::NewLine();
 
     ImGui::End();

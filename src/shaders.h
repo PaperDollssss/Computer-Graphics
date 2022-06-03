@@ -199,6 +199,23 @@ void TextureMapping::initBlendShader() {
       "	float intensity;\n"
       "};\n"
 
+      "// spot light data structure declaration\n"
+      "struct SpotLight {\n"
+      "	vec3 position;\n"
+      "	vec3 direction;\n"
+      "	float intensity;\n"
+      "	vec3 color;\n"
+      "	float angle;\n"
+      "	float kc;\n"
+      "	float kl;\n"
+      "	float kq;\n"
+      "};\n"
+
+      "struct AmbientLight {\n"
+      "	vec3 color;\n"
+      "	float intensity;\n"
+      "};\n"
+
       "struct Material {\n"
       "	vec3 kds[2];\n"
       "	float blend;\n"
@@ -207,6 +224,20 @@ void TextureMapping::initBlendShader() {
       "uniform Material material;\n"
       "uniform DirectionalLight light;\n"
       "uniform sampler2D mapKds[2];\n"
+      "uniform AmbientLight ambientLight;\n"
+      "uniform SpotLight spotLight;\n"
+
+      "vec3 calcSpotLight(vec3 normal) {\n"
+      "	vec3 lightDir = normalize(spotLight.position - fPosition);\n"
+      "	float theta = acos(-dot(lightDir, normalize(spotLight.direction)));\n"
+      "	if (theta > spotLight.angle) {\n"
+      "		return vec3(0.0f, 0.0f, 0.0f);\n"
+      "	}\n"
+      "	vec3 diffuse = spotLight.color * max(dot(lightDir, normal), 0.0f) * (material.kds[0]+material.kds[1]);\n"
+      "	float distance = length(spotLight.position - fPosition);\n"
+      "	float attenuation = 1.0f / (spotLight.kc + spotLight.kl * distance + spotLight.kq * distance * distance);\n"
+      "	return spotLight.intensity * attenuation * diffuse;\n"
+      "}\n"
 
       "vec3 calcDirectionalLight(vec3 normal) {\n"
       "	vec3 lightDir = normalize(-light.direction);\n"
@@ -217,11 +248,13 @@ void TextureMapping::initBlendShader() {
 
       "void main() {\n"
       "	vec3 normal = normalize(fNormal);\n"
+      "	vec3 ambient = vec3(0.03f, 0.03f, 0.03f) * ambientLight.color * ambientLight.intensity;\n"
+      "	vec3 spot = calcSpotLight(normal);\n"
       "	vec3 diffuse = calcDirectionalLight(normal);\n"
-      "	vec3 ambient = 0.08*light.color * light.intensity * "
+      //"	vec3 ambient = 0.08*light.color * light.intensity * "
       "(material.kds[0]+material.kds[1]);\n"
       "	color = mix(texture(mapKds[0], fTexCoord), texture(mapKds[1], "
-      "fTexCoord), material.blend) * vec4(diffuse+ambient, 1.0f);\n"
+      "fTexCoord), material.blend) * vec4(diffuse+ambient+spot, 1.0f);\n"
       "}\n";
 
   //----------------------------------------------------------------
