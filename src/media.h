@@ -10,6 +10,7 @@ const std::string modelPath4 = "../media/door.obj";
 const std::string modelPath5 = "../media/Arms.obj";
 const std::string modelPath6 = "../media/Arms_Left.obj";
 const std::string modelPath7 = "../media/Arms_Right.obj";
+const std::string modelPath8 = "../media/bear.obj";
 
 
 

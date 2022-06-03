@@ -70,6 +70,11 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   _armr->scale = glm::vec3(3.0f, 3.0f, 3.0f);
   _armr->computeBoundingBox();
 
+  _bear.reset(new Model(modelPath8));
+  _bear->scale = glm::vec3(0.1f, 0.1f, 0.1f);
+  _bear->position = glm::vec3(-3.0f, -10.0f, 10.0f);
+  _bear->computeBoundingBox();
+
   _cube.reset(new Model(cubeVertices, cubeIndices));
   _cube->scale = glm::vec3(1.0f, 1.0f, 1.0f);
   _cube->position = glm::vec3(10.0f, -5.0f, 0.0f);
@@ -347,12 +352,6 @@ void TextureMapping::handleInput()
   {
     if (_mouseInput.move.xCurrent != _mouseInput.move.xOld)
     {
-      // if (firstMouse)
-      //{
-      //	_mouseInput.move.xOld = _mouseInput.move.xCurrent;
-      //	_mouseInput.move.yOld = _mouseInput.move.yCurrent;
-      //	firstMouse = false;
-      // }
       double mouse_movement_in_x_direction =
           -(_mouseInput.move.xCurrent - _mouseInput.move.xOld);
       glm::vec3 right = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -360,17 +359,10 @@ void TextureMapping::handleInput()
       camera->rotation =
           glm::quat{(float)cos(thetax / 2), (float)sin(thetax / 2) * right} *
           camera->rotation;
-      //_arml->rotation = camera->rotation;
       _mouseInput.move.xOld = _mouseInput.move.xCurrent;
     }
     if (_mouseInput.move.yCurrent != _mouseInput.move.yOld)
     {
-      // if (firstMouse)
-      //{
-      //	_mouseInput.move.xOld = _mouseInput.move.xCurrent;
-      //	_mouseInput.move.yOld = _mouseInput.move.yCurrent;
-      //	firstMouse = false;
-      // }
       double mouse_movement_in_y_direction =
           -(_mouseInput.move.yCurrent - _mouseInput.move.yOld);
       glm::vec3 up = camera->getRight();
@@ -378,7 +370,6 @@ void TextureMapping::handleInput()
       camera->rotation =
           glm::quat{(float)cos(thetay / 2), (float)sin(thetay / 2) * up} *
           camera->rotation;
-      //_arml->rotation = camera->rotation;
       _mouseInput.move.yOld = _mouseInput.move.yCurrent;
     }
   }
@@ -438,7 +429,7 @@ void TextureMapping::renderFrame()
   // draw planet
   switch (_renderMode)
   {
-  case RenderMode::Simple:
+  case RenderMode::Game:
     // 1. use the shader
     _simpleShader->use();
     // 2. transfer mvp matrices to gpu
@@ -478,6 +469,13 @@ void TextureMapping::renderFrame()
     _arml->position = _camera->position;
     _shader->setMat4("model", _arml->getModelMatrix());
     _arml->draw();
+    if (((_bear->position.x - _camera->position.x) * (_bear->position.x - _camera->position.x) + (_bear->position.z - _camera->position.z) * (_bear->position.z - _camera->position.z)) < 5.0)
+        if ((_bear->position.x - _camera->position.x) < 1.0 || (_bear->position.x - _camera->position.x) > -1.0) {
+            _bear->position.x -= 0.02 * (_bear->position.x - _camera->position.x);
+            _bear->position.z -= 0.02 * (_bear->position.z - _camera->position.z);
+        }
+    _shader->setMat4("model", _bear->getModelMatrix());
+    _bear->draw();
 
     if (knock == true)
         _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
@@ -485,14 +483,11 @@ void TextureMapping::renderFrame()
         _door->position = glm::vec3(2.0f, 1.0f, 2.0f);
     _shader->setMat4("model", _door->getModelMatrix());
     _door->draw();
-    // 3. enable textures and transform textures to gpu
     glActiveTexture(GL_TEXTURE0);
     _simpleMaterial->mapKd->bind();
     break;
-  case RenderMode::Blend:
-    // 1. use the shader
+  case RenderMode::Show:
     _blendShader->use();
-    // 2. transfer mvp matrices to gpu
     _blendShader->setMat4("projection", projection);
     _blendShader->setMat4("view", view);
     _blendShader->setMat4("model", _sphere->getModelMatrix());
@@ -514,15 +509,11 @@ void TextureMapping::renderFrame()
     _door->draw();
     _blendShader->setMat4("model", _newsphere->getModelMatrix());
     _newsphere->draw();
-    // 3. transfer light attributes to gpu
     _blendShader->setVec3("light.direction", _light->getFront() * XYD);
     _blendShader->setVec3("light.color", _light->color);
     _blendShader->setFloat("light.intensity", _light->intensity);
-    // 4. transfer materials to gpu
-    // 4.1 transfer simple material attributes
     _blendShader->setVec3("material.kds[0]", _blendMaterial->kds[0]);
     _blendShader->setVec3("material.kds[1]", _blendMaterial->kds[1]);
-    // 4.2 transfer blend cofficient to gpu
     _blendShader->setFloat("material.blend", _blendMaterial->blend);
 
     glActiveTexture(GL_TEXTURE0);
@@ -532,9 +523,7 @@ void TextureMapping::renderFrame()
     _blendShader->setInt("mapKds[1]", 1);
     break;
   case RenderMode::Checker:
-    // 1. use the shader
     _checkerShader->use();
-    // 2. transfer mvp matrices to gpu
     _checkerShader->setMat4("projection", projection);
     _checkerShader->setMat4("view", view);
     _checkerShader->setMat4("model", _sphere->getModelMatrix());
@@ -544,14 +533,12 @@ void TextureMapping::renderFrame()
     _bunny->draw();
     _checkerShader->setMat4("model", _cube->getModelMatrix());
     _cube->draw();
-    // 3. transfer material attributes to gpu
     _checkerShader->setInt("material.repeat", _checkerMaterial->repeat);
     _checkerShader->setVec3("material.colors[0]", _checkerMaterial->colors[0]);
     _checkerShader->setVec3("material.colors[1]", _checkerMaterial->colors[1]);
     break;
   }
 
-  //---------------
   _lineShader->use();
   _lineShader->setMat4("projection", projection);
   _lineShader->setMat4("view", view);
@@ -587,12 +574,12 @@ void TextureMapping::renderFrame()
   {
     ImGui::Text("Render Mode");
     ImGui::Separator();
-    ImGui::RadioButton("Simple Texture Shading", (int *)&_renderMode,
-                       (int)(RenderMode::Simple));
+    ImGui::RadioButton("Game", (int *)&_renderMode,
+                       (int)(RenderMode::Game));
     ImGui::NewLine();
 
-    ImGui::RadioButton("Blend Texture Shading", (int *)&_renderMode,
-                       (int)(RenderMode::Blend));
+    ImGui::RadioButton("Show", (int *)&_renderMode,
+                       (int)(RenderMode::Show));
     ImGui::ColorEdit3("kd1", (float *)&_blendMaterial->kds[0]);
     ImGui::ColorEdit3("kd2", (float *)&_blendMaterial->kds[1]);
     ImGui::SliderFloat("blend", &_blendMaterial->blend, 0.0f, 1.0f);

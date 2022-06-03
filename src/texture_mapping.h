@@ -18,8 +18,8 @@
 
 enum class RenderMode
 {
-  Simple,
-  Blend,
+  Game,
+  Show,
   Checker
 };
 
@@ -74,6 +74,7 @@ private:
   std::unique_ptr<Model> _arms;
   std::unique_ptr<Model> _arml;
   std::unique_ptr<Model> _armr;
+  std::unique_ptr<Model> _bear;
 
 
   // npc NPC;
@@ -97,7 +98,7 @@ private:
 
   std::unique_ptr<SkyBox> _skybox;
 
-  enum RenderMode _renderMode = RenderMode::Simple;
+  enum RenderMode _renderMode = RenderMode::Game;
 
   void initInstancedShader();
 
