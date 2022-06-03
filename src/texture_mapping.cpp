@@ -71,6 +71,28 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   _armr->scale = glm::vec3(3.0f, 3.0f, 3.0f);
   _armr->computeBoundingBox();
 
+  _ground.reset(new Model(modelPath3));
+  _ground->scale = glm::vec3(5.0f, 5.0f, 5.0f);
+  _ground->position = glm::vec3(10.0f, 0.0f, 0.0f);
+  _ground->computeBoundingBox();
+
+  _door.reset(new Model(modelPath4));
+  _door->scale = glm::vec3(0.05f, 0.05f, 0.05f);
+  _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
+  _door->computeBoundingBox();
+
+  _arms.reset(new Model(modelPath5));
+  _arms->scale = glm::vec3(3.0f, 3.0f, 3.0f);
+  _arms->computeBoundingBox();
+
+  _arml.reset(new Model(modelPath6));
+  _arml->scale = glm::vec3(3.0f, 3.0f, 3.0f);
+  _arml->computeBoundingBox();
+
+  _armr.reset(new Model(modelPath7));
+  _armr->scale = glm::vec3(3.0f, 3.0f, 3.0f);
+  _armr->computeBoundingBox();
+
   _cube.reset(new Model(cubeVertices, cubeIndices));
   _cube->scale = glm::vec3(1.0f, 1.0f, 1.0f);
   _cube->position = glm::vec3(10.0f, -5.0f, 0.0f);
