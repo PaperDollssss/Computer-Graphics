@@ -6,6 +6,7 @@
 
 #include "model.h"
 
+std::vector<glm::vec3> f_indices;
 Model::Model(const std::string &filepath)
 {
   obj::attrib_o attrib;
@@ -40,6 +41,12 @@ Model::Model(const std::string &filepath)
       vertex.position.y = attrib.vertices[3 * index.v_index + 1];
       vertex.position.z = attrib.vertices[3 * index.v_index + 2];
 
+      if (index.t_index >= 0)
+      {
+        vertex.texCoord.x = attrib.vertices[3 * index.t_index + 0];
+        vertex.texCoord.y = attrib.vertices[3 * index.t_index + 1];
+      }
+
       if (index.n_index >= 0)
       {
         vertex.normal.x = attrib.norms[3 * index.n_index + 0];
@@ -53,9 +60,13 @@ Model::Model(const std::string &filepath)
         uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
         vertices.push_back(vertex);
       }
-
+      if (filepath == "../media/nanosuit.obj")
+      {
+        f_indices.push_back(glm::vec3(index.v_index + 1, index.t_index + 1, index.n_index + 1));
+      }
       indices.push_back(uniqueVertices[vertex]);
     }
+    f_indices.push_back(glm::vec3(-1, -1, -1));
   }
 
   _vertices = vertices;
@@ -297,4 +308,62 @@ bool Model::checkBoundingBall(const glm::vec3 &point) const
     return false;
   else
     return true;
+}
+
+std::vector<Vertex> Model::getVertices()
+{
+  return _vertices;
+}
+
+std::vector<uint32_t> Model::getIndices()
+{
+  return _indices;
+}
+
+bool ExportObj(Model *inputModel)
+{
+  std::vector<glm::vec3> position, normal;
+  std::vector<glm::vec2> textCoords;
+  for (auto vertex : inputModel->getVertices())
+  {
+    position.push_back(vertex.position);
+    normal.push_back(vertex.normal);
+    textCoords.push_back(vertex.texCoord);
+  }
+  std::ofstream fout("nanosuit.obj");
+  for (auto p : position)
+  {
+    fout << "v ";
+    fout << p.x << " " << p.y << " " << p.z << std::endl;
+  }
+  for (auto t : textCoords)
+  {
+    fout << "vt ";
+    fout << t.x << " " << t.y << std::endl;
+  }
+  for (auto n : normal)
+  {
+    fout << "vn ";
+    fout << n.x << " " << n.y << " " << n.z << std::endl;
+  }
+  int count = 0;
+  int faces = 0;
+  for (auto i : f_indices)
+  {
+    if (i.x == -1)
+      fout << "g _" + faces << std::endl;
+    if (count == 0)
+      fout << "f ";
+    fout << i.x << "/" << i.y << "/" << i.z;
+    if (count == 2)
+    {
+      fout << std::endl;
+      count = 0;
+      continue;
+    }
+    else
+      fout << " ";
+    count++;
+  }
+  return true;
 }

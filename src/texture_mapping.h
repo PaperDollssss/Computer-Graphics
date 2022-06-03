@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <string>
-#include <windows.h>
+// #include <windows.h>
 
 #include "base/application.h"
 #include "base/camera.h"
@@ -70,7 +70,7 @@ private:
   std::unique_ptr<Model> _maze;
   std::unique_ptr<Model> _ground;
   std::unique_ptr<Model> _newsphere;
-  // npc NPC;
+  npc NPC;
 
   std::unique_ptr<SimpleMaterial> _simpleMaterial;
   std::unique_ptr<BlendMaterial> _blendMaterial;
