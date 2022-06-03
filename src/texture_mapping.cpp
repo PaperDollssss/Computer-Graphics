@@ -450,11 +450,19 @@ void TextureMapping::renderFrame()
     _arml->position = _camera->position;
     _blendShader->setMat4("model", _arml->getModelMatrix());
     _arml->draw();
-    if (((_bear->position.x - _camera->position.x) * (_bear->position.x - _camera->position.x) + (_bear->position.z - _camera->position.z) * (_bear->position.z - _camera->position.z)) < 5.0)
-        if ((_bear->position.y - _camera->position.y) < 1.0 || (_bear->position.y - _camera->position.y) > -1.0) {
-            _bear->position.x -= 0.02 * (_bear->position.x - _camera->position.x);
-            _bear->position.z -= 0.02 * (_bear->position.z - _camera->position.z);
+    if (((_bear->position.x - _camera->position.x) * (_bear->position.x - _camera->position.x) + (_bear->position.z - _camera->position.z) * (_bear->position.z - _camera->position.z)) < 9.0)
+        if ((_bear->position.y - _camera->position.y) < 1.0 && (_bear->position.y - _camera->position.y) > -1.0) {
+            if (_bear->position.x > _camera->position.x)
+                _bear->position.x -= 0.01 * (3.0 - (_bear->position.x - _camera->position.x));
+            if (_bear->position.x < _camera->position.x)
+                _bear->position.x += 0.01 * (3.0 - (_bear->position.x - _camera->position.x));
+            if (_bear->position.z > _camera->position.z)
+                _bear->position.z -= 0.01 * (3.0 - (_bear->position.z - _camera->position.z));
+            if (_bear->position.z < _camera->position.z)
+                _bear->position.z += 0.01 * (3.0 - (_bear->position.z - _camera->position.z));
+
         }
+    printf("%f,%f,%f", &_camera->position.x, &_camera->position.y, &_camera->position.z);
     _blendShader->setMat4("model", _bear->getModelMatrix());
     _bear->draw();
 
