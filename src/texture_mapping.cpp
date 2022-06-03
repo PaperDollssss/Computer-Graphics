@@ -49,46 +49,21 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   _maze->computeBoundingBox();
   _maze->computeInBoundingBox();
 
-  _ground.reset(new Model(modelPath3));
-  _ground->scale = glm::vec3(5.0f, 5.0f, 5.0f);
-  _ground->position = glm::vec3(10.0f, 0.0f, 0.0f);
-  _ground->computeBoundingBox();
-
   _door.reset(new Model(modelPath4));
   _door->scale = glm::vec3(0.05f, 0.05f, 0.05f);
   _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
   _door->computeBoundingBox();
-
-  _arms.reset(new Model(modelPath5));
-  _arms->scale = glm::vec3(3.0f, 3.0f, 3.0f);
-  _arms->computeBoundingBox();
-
-  _arml.reset(new Model(modelPath6));
-  _arml->scale = glm::vec3(3.0f, 3.0f, 3.0f);
-  _arml->computeBoundingBox();
-
-  _armr.reset(new Model(modelPath7));
-  _armr->scale = glm::vec3(3.0f, 3.0f, 3.0f);
-  _armr->computeBoundingBox();
 
   _bear.reset(new Model(modelPath8));
   _bear->scale = glm::vec3(0.1f, 0.1f, 0.1f);
   _bear->position = glm::vec3(-3.0f, -10.0f, 10.0f);
   _bear->computeBoundingBox();
 
-  _ground.reset(new Model(modelPath3));
-  _ground->scale = glm::vec3(5.0f, 5.0f, 5.0f);
-  _ground->position = glm::vec3(10.0f, 0.0f, 0.0f);
-  _ground->computeBoundingBox();
-
   _door.reset(new Model(modelPath4));
   _door->scale = glm::vec3(0.05f, 0.05f, 0.05f);
   _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
   _door->computeBoundingBox();
 
-  _arms.reset(new Model(modelPath5));
-  _arms->scale = glm::vec3(3.0f, 3.0f, 3.0f);
-  _arms->computeBoundingBox();
 
   _arml.reset(new Model(modelPath6));
   _arml->scale = glm::vec3(3.0f, 3.0f, 3.0f);
@@ -464,61 +439,43 @@ void TextureMapping::renderFrame()
   switch (_renderMode)
   {
   case RenderMode::Game:
-    // 1. use the shader
-    _simpleShader->use();
-    // 2. transfer mvp matrices to gpu
-    _simpleShader->setMat4("projection", projection);
-    _simpleShader->setMat4("view", view);
-    _simpleShader->setMat4("model", _sphere->getModelMatrix());
-    //    _sphere->draw();
-    _bunny->scale = glm::vec3(y + 0.3, y + 0.3, y + 0.3);
-
-    _shader->use();
-    _shader->setMat4("projection", projection);
-    _shader->setMat4("view", view);
-    //_simpleShader->setMat4("model", _bunny->getModelMatrix());
-    _shader->setMat4("model", _bunny->getModelMatrix());
-    _bunny->draw();
-    //_simpleShader->setMat4("model", _cube->getModelMatrix());
-    _shader->setMat4("model", _cube->getModelMatrix());
-    _cube->draw();
-    _shader->setMat4("model", _cone->getModelMatrix());
-    //    _cone->draw();
-    _shader->setMat4("model", _cylinder->getModelMatrix());
-    //    _cylinder->draw();
-    _shader->setMat4("model", _roundtable->getModelMatrix());
-    _roundtable->draw();
-    _shader->setMat4("model", _newsphere->getModelMatrix());
-    _newsphere->draw();
-    // _shader->setMat4("model", curNPC->getModelMatrix());
-    // curNPC->draw();
-    _shader->setMat4("model", _maze->getModelMatrix());
+    _blendShader->use();
+    _blendShader->setMat4("projection", projection);
+    _blendShader->setMat4("view", view);
+    _blendShader->setMat4("model", _maze->getModelMatrix());
     _maze->draw();
-    _shader->setMat4("model", _ground->getModelMatrix());
-    _ground->draw();
-
     _armr->position = _camera->position;
-    _shader->setMat4("model", _armr->getModelMatrix());
+    _blendShader->setMat4("model", _armr->getModelMatrix());
     _armr->draw();
     _arml->position = _camera->position;
-    _shader->setMat4("model", _arml->getModelMatrix());
+    _blendShader->setMat4("model", _arml->getModelMatrix());
     _arml->draw();
     if (((_bear->position.x - _camera->position.x) * (_bear->position.x - _camera->position.x) + (_bear->position.z - _camera->position.z) * (_bear->position.z - _camera->position.z)) < 5.0)
-        if ((_bear->position.x - _camera->position.x) < 1.0 || (_bear->position.x - _camera->position.x) > -1.0) {
+        if ((_bear->position.y - _camera->position.y) < 1.0 || (_bear->position.y - _camera->position.y) > -1.0) {
             _bear->position.x -= 0.02 * (_bear->position.x - _camera->position.x);
             _bear->position.z -= 0.02 * (_bear->position.z - _camera->position.z);
         }
-    _shader->setMat4("model", _bear->getModelMatrix());
+    _blendShader->setMat4("model", _bear->getModelMatrix());
     _bear->draw();
 
     if (knock == true)
       _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
     else
       _door->position = glm::vec3(2.0f, 1.0f, 2.0f);
-    _shader->setMat4("model", _door->getModelMatrix());
+    _blendShader->setMat4("model", _door->getModelMatrix());
     _door->draw();
+    _blendShader->setVec3("light.direction", _light->getFront() * XYD);
+    _blendShader->setVec3("light.color", _light->color);
+    _blendShader->setFloat("light.intensity", _light->intensity);
+    _blendShader->setVec3("material.kds[0]", _blendMaterial->kds[0]);
+    _blendShader->setVec3("material.kds[1]", _blendMaterial->kds[1]);
+    _blendShader->setFloat("material.blend", _blendMaterial->blend);
+
     glActiveTexture(GL_TEXTURE0);
-    _simpleMaterial->mapKd->bind();
+    _blendMaterial->mapKds[0]->bind();
+    glActiveTexture(GL_TEXTURE1);
+    _blendMaterial->mapKds[1]->bind();
+    _blendShader->setInt("mapKds[1]", 1);
     break;
   case RenderMode::Show:
     _blendShader->use();
@@ -531,10 +488,17 @@ void TextureMapping::renderFrame()
     _bunny->draw();
     _blendShader->setMat4("model", _cube->getModelMatrix());
     _cube->draw();
+    _blendShader->setMat4("model", _cone->getModelMatrix());
+    _cone->draw();
+    _blendShader->setMat4("model", _cylinder->getModelMatrix());
+    _cylinder->draw();
+    _blendShader->setMat4("model", _roundtable->getModelMatrix());
+    _roundtable->draw();
+
     _blendShader->setMat4("model", _maze->getModelMatrix());
     _maze->draw();
-    _blendShader->setMat4("model", _ground->getModelMatrix());
-    _ground->draw();
+    // _blendShader->setMat4("model", curNPC->getModelMatrix());
+    // curNPC->draw();
     if (knock == true)
       _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
     else
@@ -562,9 +526,6 @@ void TextureMapping::renderFrame()
     _checkerShader->setMat4("view", view);
     _checkerShader->setMat4("model", _sphere->getModelMatrix());
     _sphere->draw();
-    _bunny->scale = glm::vec3(y + 0.3, y + 0.3, y + 0.3);
-    _checkerShader->setMat4("model", _bunny->getModelMatrix());
-    _bunny->draw();
     _checkerShader->setMat4("model", _cube->getModelMatrix());
     _cube->draw();
     _checkerShader->setInt("material.repeat", _checkerMaterial->repeat);
@@ -589,7 +550,7 @@ void TextureMapping::renderFrame()
   _lineShader->setMat4("model", _maze->getModelMatrix());
   _maze->drawBoundingBox();
   glLineWidth(_lineMaterial->width);
-  //---------------------
+ 
 
   _skybox->draw(projection, view);
 
