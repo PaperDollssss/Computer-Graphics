@@ -83,6 +83,7 @@ private:
   std::unique_ptr<CheckerMaterial> _checkerMaterial;
 
   std::unique_ptr<PerspectiveCamera> _camera;
+  std::unique_ptr<PerspectiveCamera> _camera1;
   std::unique_ptr<DirectionalLight> _light;
   std::unique_ptr<SpotLight> _spotLight;
   std::unique_ptr<AmbientLight> _ambientLight;

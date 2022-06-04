@@ -11,6 +11,7 @@ public:
 
 	glm::vec3 getFront() const;
 
+
 	glm::vec3 getUp() const;
 
 	glm::vec3 getRight() const;

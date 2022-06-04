@@ -25,6 +25,9 @@ float xd = -1.0, yd = 1.0;
 bool knock = true;
 bool knocky = false;
 glm::mat4 view1;
+int player = 0;
+int hint = 1;
+glm::vec3 camtemp;
 
 TextureMapping::TextureMapping(const Options &options) : Application(options)
 {
@@ -252,7 +255,7 @@ void TextureMapping::handleInput()
     _camera.reset(new PerspectiveCamera(glm::radians(50.0f),
                                         1.0f * _windowWidth / _windowHeight,
                                         0.1f, 10000.0f));
-    _camera->position.z = 10.0f;
+    _camera->position.z = 0.0f;
     _camera->rotation =
         glm::lookAt(glm::vec3(0.0, 0.0, 3.0), glm::vec3(0.0, 0.0, 0.0),
                     glm::vec3(0.0, 1.0, 0.0));
@@ -273,52 +276,99 @@ void TextureMapping::handleInput()
     _camera->position = glm::vec3(OrbitX, _camera->position.y, OrbitZ);
   }
 
-  if (_keyboardInput.keyStates[GLFW_KEY_W] != GLFW_RELEASE)
-  {
-    cameraPos = cameraMoveSpeed * _camera->getFront();
-    _camera->position += cameraPos;
-    if (checkBounding(_camera->position + 10.0f * cameraPos))
-      _camera->position -= cameraPos;
-  }
-  if (_keyboardInput.keyStates[GLFW_KEY_D] != GLFW_RELEASE)
-  {
-    cameraPos = _camera->getRight() * cameraMoveSpeed;
-    _camera->position += cameraPos;
+  if (_keyboardInput.keyStates[GLFW_KEY_W] != GLFW_RELEASE) {
+      if (player == 0) 
+          {
+              cameraPos = cameraMoveSpeed * _camera->getFront();
+              _camera->position += cameraPos;
+              if (checkBounding(_camera->position + 10.0f * cameraPos))
+                  _camera->position -= cameraPos;
+          }
+      else{
+          cameraPos = cameraMoveSpeed * _camera->getFront();
+          _camera->position.x += cameraPos.x;
+          _camera->position.z += cameraPos.z;
 
-    if (checkBounding(_camera->position + 10.0f * cameraPos))
-      _camera->position -= cameraPos;
+          if (checkBounding(_camera->position + 10.0f * cameraPos))
+              _camera->position -= cameraPos;
+      }
+      }
+  if (_keyboardInput.keyStates[GLFW_KEY_D] != GLFW_RELEASE) {
+      if (player == 0)
+    {
+        cameraPos = _camera->getRight() * cameraMoveSpeed;
+        _camera->position += cameraPos;
+        if (checkBounding(_camera->position + 10.0f * cameraPos))
+            _camera->position -= cameraPos;
   }
+      else {
+        cameraPos = _camera->getRight() * cameraMoveSpeed;
+        _camera->position.x += cameraPos.x;
+        _camera->position.z += cameraPos.z;
+        if (checkBounding(_camera->position + 10.0f * cameraPos))
+            _camera->position -= cameraPos;
+      }
+      }
   if (_keyboardInput.keyStates[GLFW_KEY_S] != GLFW_RELEASE)
   {
-    cameraPos = cameraMoveSpeed * _camera->getFront();
-    _camera->position -= cameraPos;
-
-    if (checkBounding(_camera->position - 10.0f * cameraPos))
-      _camera->position += cameraPos;
+      if (player == 0) {
+          cameraPos = cameraMoveSpeed * _camera->getFront();
+          _camera->position -= cameraPos;
+          if (checkBounding(_camera->position - 10.0f * cameraPos))
+              _camera->position += cameraPos;
+      }
+      else {
+          cameraPos = cameraMoveSpeed * _camera->getFront();
+          _camera->position.x -= cameraPos.x;
+          _camera->position.z -= cameraPos.z;
+          if (checkBounding(_camera->position - 10.0f * cameraPos))
+              _camera->position += cameraPos;
+      }
   }
   if (_keyboardInput.keyStates[GLFW_KEY_A] != GLFW_RELEASE)
   {
-    cameraPos = _camera->getRight() * cameraMoveSpeed;
-    _camera->position -= cameraPos;
-
-    if (checkBounding(_camera->position - 10.0f * cameraPos))
-      _camera->position += cameraPos;
+      if (player == 0) {
+          cameraPos = _camera->getRight() * cameraMoveSpeed;
+          _camera->position -= cameraPos;
+          if (checkBounding(_camera->position - 10.0f * cameraPos))
+              _camera->position += cameraPos;
+      }
+      else {
+          cameraPos = _camera->getRight() * cameraMoveSpeed;
+          _camera->position.x -= cameraPos.x;
+          _camera->position.z -= cameraPos.z;
+          if (checkBounding(_camera->position - 10.0f * cameraPos))
+              _camera->position += cameraPos;
+      }
   }
-  if (_keyboardInput.keyStates[GLFW_KEY_E] != GLFW_RELEASE)
-  {
-    cameraPos = cameraMoveSpeed * cameraUp;
-    _camera->position -= cameraPos;
+  if (_keyboardInput.keyStates[GLFW_KEY_E] != GLFW_RELEASE) {
+      if (player == 0) 
+          {
+              cameraPos = cameraMoveSpeed * cameraUp;
+              _camera->position -= cameraPos;
 
-    if (checkBounding(_camera->position - 10.0f * cameraPos))
-      _camera->position += cameraPos;
-  }
-  if (_keyboardInput.keyStates[GLFW_KEY_Q] != GLFW_RELEASE)
-  {
-    cameraPos = cameraMoveSpeed * cameraUp;
-    _camera->position += cameraPos;
+              if (checkBounding(_camera->position - 10.0f * cameraPos))
+                  _camera->position += cameraPos;
+          }
+      else {
+          _camera->position.y= 0.0;
+          hint = 0;
 
-    if (checkBounding(_camera->position + 10.0f * cameraPos))
-      _camera->position -= cameraPos;
+      }
+      }
+  if (_keyboardInput.keyStates[GLFW_KEY_Q] != GLFW_RELEASE) {
+      if (player==0) 
+          {
+              cameraPos = cameraMoveSpeed * cameraUp;
+              _camera->position += cameraPos;
+
+              if (checkBounding(_camera->position + 10.0f * cameraPos))
+                  _camera->position -= cameraPos;
+          }
+      else {
+             _camera->position.y = 10.0;
+             hint = 1;
+      }
   }
 
   if (_keyboardInput.keyStates[GLFW_KEY_P] != GLFW_RELEASE)
@@ -441,6 +491,7 @@ void TextureMapping::renderFrame()
   switch (_renderMode)
   {
   case RenderMode::Game:
+      player = 1;
     _blendShader->use();
     _blendShader->setMat4("projection", projection);
     _blendShader->setMat4("view", view);
@@ -466,6 +517,15 @@ void TextureMapping::renderFrame()
       }
     _blendShader->setMat4("model", _bear->getModelMatrix());
     _bear->draw();
+    if (hint == 1) {
+        _bear->position.x = _camera->position.x;
+        _bear->position.y = -14.0f;
+        _bear->position.z = _camera->position.z;
+
+        _blendShader->setMat4("model", _bear->getModelMatrix());
+        _bear->draw();
+        hint = 0;
+    }
 
     if (knock == true)
       _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
@@ -498,6 +558,7 @@ void TextureMapping::renderFrame()
     _blendShader->setInt("mapKds[1]", 1);
     break;
   case RenderMode::Show:
+      player = 0;
     _blendShader->use();
     _blendShader->setMat4("projection", projection);
     _blendShader->setMat4("view", view);
