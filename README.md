@@ -7,14 +7,16 @@ cmake -Bbuild .
 cd build
 cmake --build . --parallel 8
 ```
-
 对于Windows，修改.//相对路径问题，并将texture_mapping.h中的windows.h解开注释即可
+
 对于mac，修改../相对路径问题，并将texture_mapping.h中的windows.h注释即可
+
 CmakeList.txt已修改，无需改动。
 
 ## code specification
 
 采用visual studio c++代码规则
+
 缩进：2空格
 
 ## To Do
@@ -29,10 +31,15 @@ CmakeList.txt已修改，无需改动。
 
 ### 0.1 总体要求
 **40 total**
+
 简单室内场景三维建模及真实感绘制
+
 第一次验收（展示）时间：最后一次课，6月7日，**演示大程、代码模块、回答问题（对照源码介绍实现方法）**
+
 第二次验收时间：6月18日或19日之前，**仅演示最后的大程，可放弃**
+
 提交截止时间：6月20日，**提交：源代码、报告文档、可执行程序+相关数据资源**
+
 ### 0.2 基本要求
 **35 total, 5 each**
 - [x] 基本体素的建模表达能力
