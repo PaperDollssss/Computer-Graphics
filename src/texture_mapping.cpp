@@ -47,29 +47,8 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   _maze->scale = glm::vec3(5.0f, 5.0f, 5.0f);
   _maze->position = glm::vec3(-10.0f, -15.0f, 0.0f);
   _maze->computeBoundingBox();
-  _maze->computeInBoundingBox();
-
-  _ground.reset(new Model(modelPath3));
-  _ground->scale = glm::vec3(5.0f, 5.0f, 5.0f);
-  _ground->position = glm::vec3(10.0f, 0.0f, 0.0f);
-  _ground->computeBoundingBox();
-
-  _door.reset(new Model(modelPath4));
-  _door->scale = glm::vec3(0.05f, 0.05f, 0.05f);
-  _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
-  _door->computeBoundingBox();
-
-  _arms.reset(new Model(modelPath5));
-  _arms->scale = glm::vec3(3.0f, 3.0f, 3.0f);
-  _arms->computeBoundingBox();
-
-  _arml.reset(new Model(modelPath6));
-  _arml->scale = glm::vec3(3.0f, 3.0f, 3.0f);
-  _arml->computeBoundingBox();
-
-  _armr.reset(new Model(modelPath7));
-  _armr->scale = glm::vec3(3.0f, 3.0f, 3.0f);
-  _armr->computeBoundingBox();
+  _maze->changeBoundingBoxY(30);//to change the y bounding box for compute
+  _maze->computeInBoundingBox();//add this funtcion if you want to use octree
 
   _ground.reset(new Model(modelPath3));
   _ground->scale = glm::vec3(5.0f, 5.0f, 5.0f);
@@ -117,7 +96,7 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   _newsphere->scale = glm::vec3(2.0f, 2.0f, 2.0f);
   _newsphere->position = glm::vec3(40.0f, 5.0f, 0.0f);
   _newsphere->computeBoundingBox();
-  _newsphere->computeInBoundingBox();
+  //_newsphere->computeInBoundingBox();
 
   // init textures
   std::shared_ptr<Texture2D> earthTexture =
@@ -294,7 +273,6 @@ void TextureMapping::handleInput()
   {
     cameraPos = cameraMoveSpeed * _camera->getFront();
     _camera->position += cameraPos;
-
     if (checkBounding(_camera->position + 10.0f * cameraPos))
       _camera->position -= cameraPos;
   }
@@ -538,6 +516,7 @@ void TextureMapping::renderFrame()
       _cube->drawBoundingBox();
       _lineShader->setMat4("model", _maze->getModelMatrix());
       _maze->drawBoundingBox();
+      
       glLineWidth(_lineMaterial->width);
     }
     // 3. enable textures and transform textures to gpu
@@ -668,7 +647,7 @@ bool TextureMapping::checkBounding(const glm::vec3 &positon)
     return true;
   if (_maze->checkInBoundingBox(positon))
     return true;
-  if (_newsphere->checkInBoundingBox(positon))
+  if (_newsphere->checkBoundingBall(positon))
     return true;
   // if (NPC.changeModel()->checkBoundingBox(positon))
   //   return true;
