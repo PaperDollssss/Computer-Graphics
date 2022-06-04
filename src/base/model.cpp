@@ -6,7 +6,8 @@
 
 #include "model.h"
 
-Model::Model(const std::string& filepath)
+std::vector<glm::vec3> f_indices;
+Model::Model(const std::string &filepath)
 {
   obj::attrib_o attrib;
   std::vector<obj::shape_o> shapes;
@@ -30,15 +31,21 @@ Model::Model(const std::string& filepath)
   std::vector<uint32_t> indices;
   std::unordered_map<Vertex, uint32_t> uniqueVertices;
 
-  for (const auto& shape : shapes)
+  for (const auto &shape : shapes)
   {
-    for (const auto& index : shape.mesh.indices)
+    for (const auto &index : shape.mesh.indices)
     {
       Vertex vertex{};
 
       vertex.position.x = attrib.vertices[3 * index.v_index + 0];
       vertex.position.y = attrib.vertices[3 * index.v_index + 1];
       vertex.position.z = attrib.vertices[3 * index.v_index + 2];
+
+      //if (index.t_index >= 0)
+      //{
+      //  vertex.texCoord.x = attrib.vertices[3 * index.t_index + 0];
+      //  vertex.texCoord.y = attrib.vertices[3 * index.t_index + 1];
+      //}
 
       if (index.n_index >= 0)
       {
@@ -53,9 +60,13 @@ Model::Model(const std::string& filepath)
         uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
         vertices.push_back(vertex);
       }
-
+      if (filepath == "../media/nanosuit.obj")
+      {
+        f_indices.push_back(glm::vec3(index.v_index + 1, index.t_index + 1, index.n_index + 1));
+      }
       indices.push_back(uniqueVertices[vertex]);
     }
+    f_indices.push_back(glm::vec3(-1, -1, -1));
   }
 
   _vertices = vertices;
@@ -75,9 +86,9 @@ Model::Model(const std::string& filepath)
   }
 }
 
-Model::Model(const std::vector<Vertex>& vertices,
-  const std::vector<uint32_t>& indices)
-  : _vertices(vertices), _indices(indices)
+Model::Model(const std::vector<Vertex> &vertices,
+             const std::vector<uint32_t> &indices)
+    : _vertices(vertices), _indices(indices)
 {
 
   computeBoundingBox();
@@ -94,11 +105,11 @@ Model::Model(const std::vector<Vertex>& vertices,
   }
 }
 
-Model::Model(Model&& rhs) noexcept
-  : _vertices(std::move(rhs._vertices)), _indices(std::move(rhs._indices)),
-  _boundingBox(std::move(rhs._boundingBox)), _vao(rhs._vao), _vbo(rhs._vbo),
-  _ebo(rhs._ebo), _boxVao(rhs._boxVao), _boxVbo(rhs._boxVbo),
-  _boxEbo(rhs._boxEbo)
+Model::Model(Model &&rhs) noexcept
+    : _vertices(std::move(rhs._vertices)), _indices(std::move(rhs._indices)),
+      _boundingBox(std::move(rhs._boundingBox)), _vao(rhs._vao), _vbo(rhs._vbo),
+      _ebo(rhs._ebo), _boxVao(rhs._boxVao), _boxVbo(rhs._boxVbo),
+      _boxEbo(rhs._boxEbo)
 {
   _vao = 0;
   _vbo = 0;
@@ -116,7 +127,7 @@ void Model::draw() const
 {
   glBindVertexArray(_vao);
   glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(_indices.size()),
-    GL_UNSIGNED_INT, 0);
+                 GL_UNSIGNED_INT, 0);
   glBindVertexArray(0);
 }
 
@@ -149,22 +160,22 @@ void Model::initGLResources()
   glBindVertexArray(_vao);
   glBindBuffer(GL_ARRAY_BUFFER, _vbo);
   glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * _vertices.size(),
-    _vertices.data(), GL_STATIC_DRAW);
+               _vertices.data(), GL_STATIC_DRAW);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(uint32_t),
-    _indices.data(), GL_STATIC_DRAW);
+               _indices.data(), GL_STATIC_DRAW);
 
   // specify layout, size of a vertex, data type, normalize, sizeof vertex
   // array, offset of the attribute
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-    (void*)offsetof(Vertex, position));
+                        (void *)offsetof(Vertex, position));
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-    (void*)offsetof(Vertex, normal));
+                        (void *)offsetof(Vertex, normal));
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-    (void*)offsetof(Vertex, texCoord));
+                        (void *)offsetof(Vertex, texCoord));
   glEnableVertexAttribArray(2);
 
   glBindVertexArray(0);
@@ -179,7 +190,7 @@ void Model::computeBoundingBox()
   float maxY = -std::numeric_limits<float>::max();
   float maxZ = -std::numeric_limits<float>::max();
 
-  for (const auto& v : _vertices)
+  for (const auto &v : _vertices)
   {
     minX = std::min(v.position.x, minX);
     minY = std::min(v.position.y, minY);
@@ -209,8 +220,8 @@ void Model::initBoxGLResources()
       glm::vec3(_boundingBox.max.x, _boundingBox.max.y, _boundingBox.max.z),
   };
 
-  std::vector<uint32_t> boxIndices = { 0, 1, 0, 2, 0, 4, 3, 1, 3, 2, 3, 7,
-                                      5, 4, 5, 1, 5, 7, 6, 4, 6, 7, 6, 2 };
+  std::vector<uint32_t> boxIndices = {0, 1, 0, 2, 0, 4, 3, 1, 3, 2, 3, 7,
+                                      5, 4, 5, 1, 5, 7, 6, 4, 6, 7, 6, 2};
 
   glGenVertexArrays(1, &_boxVao);
   glGenBuffers(1, &_boxVbo);
@@ -219,11 +230,11 @@ void Model::initBoxGLResources()
   glBindVertexArray(_boxVao);
   glBindBuffer(GL_ARRAY_BUFFER, _boxVbo);
   glBufferData(GL_ARRAY_BUFFER, boxVertices.size() * sizeof(glm::vec3),
-    boxVertices.data(), GL_STATIC_DRAW);
+               boxVertices.data(), GL_STATIC_DRAW);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _boxEbo);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, boxIndices.size() * sizeof(uint32_t),
-    boxIndices.data(), GL_STATIC_DRAW);
+               boxIndices.data(), GL_STATIC_DRAW);
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), 0);
   glEnableVertexAttribArray(0);
@@ -270,7 +281,7 @@ void Model::cleanup()
   }
 }
 
-bool Model::checkBoundingBox(const glm::vec3& point) const
+bool Model::checkBoundingBox(const glm::vec3 &point) const
 {
   if (point.x < _boundingBox.min.x)
     return false;
@@ -287,7 +298,7 @@ bool Model::checkBoundingBox(const glm::vec3& point) const
   return true;
 }
 
-bool Model::checkBoundingBall(const glm::vec3& point) const
+bool Model::checkBoundingBall(const glm::vec3 &point) const
 {
   // sphereRadius = 5 * 2
   if (sqrt(pow((point.x - position.x), 2) + pow((point.y - position.y), 2) + pow((point.z - position.z), 2)) > 10)
@@ -296,6 +307,63 @@ bool Model::checkBoundingBall(const glm::vec3& point) const
     return true;
 }
 
+std::vector<Vertex> Model::getVertices()
+{
+  return _vertices;
+}
+
+std::vector<uint32_t> Model::getIndices()
+{
+  return _indices;
+}
+
+bool ExportObj(Model *inputModel)
+{
+  std::vector<glm::vec3> position, normal;
+  std::vector<glm::vec2> textCoords;
+  for (auto vertex : inputModel->getVertices())
+  {
+    position.push_back(vertex.position);
+    normal.push_back(vertex.normal);
+    textCoords.push_back(vertex.texCoord);
+  }
+  std::ofstream fout("nanosuit.obj");
+  for (auto p : position)
+  {
+    fout << "v ";
+    fout << p.x << " " << p.y << " " << p.z << std::endl;
+  }
+  for (auto t : textCoords)
+  {
+    fout << "vt ";
+    fout << t.x << " " << t.y << std::endl;
+  }
+  for (auto n : normal)
+  {
+    fout << "vn ";
+    fout << n.x << " " << n.y << " " << n.z << std::endl;
+  }
+  int count = 0;
+  int faces = 0;
+  for (auto i : f_indices)
+  {
+    if (i.x == -1)
+      fout << "g _" + faces << std::endl;
+    if (count == 0)
+      fout << "f ";
+    fout << i.x << "/" << i.y << "/" << i.z;
+    if (count == 2)
+    {
+      fout << std::endl;
+      count = 0;
+      continue;
+    }
+    else
+      fout << " ";
+    count++;
+  }
+  return true;
+}
 void Model::computeInBoundingBox()
 {
   tmaxdepth = cal(8);
@@ -303,14 +371,14 @@ void Model::computeInBoundingBox()
   tym = (_boundingBox.max.y - _boundingBox.min.y) / tmaxdepth;
   tzm = (_boundingBox.max.z - _boundingBox.min.z) / tmaxdepth;
   createOctree(rootNode, 8, _boundingBox.min.x, _boundingBox.max.x, _boundingBox.min.y, _boundingBox.max.y, _boundingBox.min.z, _boundingBox.max.z);
-  for (const auto& v : _vertices)
+  for (const auto &v : _vertices)
   {
     glm::vec3 w = glm::vec3((getModelMatrix() * glm::vec4(v.position, 1.0f)).x, (getModelMatrix() * glm::vec4(v.position, 1.0f)).y, (getModelMatrix() * glm::vec4(v.position, 1.0f)).z);
-    //std::cout << w.y << std::endl;
+    // std::cout << w.y << std::endl;
     compute(rootNode, w.x, w.y, w.z);
   }
 }
-bool Model::checkInBoundingBox(const glm::vec3& point)
+bool Model::checkInBoundingBox(const glm::vec3 &point)
 {
   if (find(rootNode, point.x, point.y, point.z))
     return true;
@@ -323,7 +391,7 @@ void Model::changeBoundingBoxY(const int multiple)
 }
 
 template <class T>
-inline bool Model::find(OctreeNode<T>*& p, double x, double y, double z)
+inline bool Model::find(OctreeNode<T> *&p, double x, double y, double z)
 {
   double xm = (p->xmax - p->xmin) / 2;
   double ym = (p->ymax - p->ymin) / 2;
@@ -335,8 +403,8 @@ inline bool Model::find(OctreeNode<T>*& p, double x, double y, double z)
   }
   if (x <= p->xmin + txm && x >= p->xmax - txm && y <= p->ymin + tym && y >= p->ymax - tym && z <= p->zmin + tzm && z >= p->zmax - tzm)
   {
-    //std::cout << "point " << x << " " << y << " " << z << std::endl;
-    //std::cout << p->data << std::endl;
+    // std::cout << "point " << x << " " << y << " " << z << std::endl;
+    // std::cout << p->data << std::endl;
     return p->data;
   }
   else if (x <= (p->xmax - xm) && y <= (p->ymax - ym) && z <= (p->zmax - zm))
@@ -376,7 +444,7 @@ inline bool Model::find(OctreeNode<T>*& p, double x, double y, double z)
 }
 
 template <class T>
-inline void Model::compute(OctreeNode<T>*& p, double x, double y, double z)
+inline void Model::compute(OctreeNode<T> *&p, double x, double y, double z)
 {
   double xm = (p->xmax - p->xmin) / 2;
   double ym = (p->ymax - p->ymin) / 2;
@@ -388,7 +456,7 @@ inline void Model::compute(OctreeNode<T>*& p, double x, double y, double z)
   }
   if (x <= p->xmin + txm && x >= p->xmax - txm && y <= p->ymin + tym && y >= p->ymax - tym && z <= p->zmin + tzm && z >= p->zmax - tzm)
   {
-    //std::cout << "create point " << x << " " << y << " " << z << std::endl;
+    // std::cout << "create point " << x << " " << y << " " << z << std::endl;
     p->data = 1;
   }
   else if (x <= (p->xmax - xm) && y <= (p->ymax - ym) && z <= (p->zmax - zm))
@@ -423,5 +491,4 @@ inline void Model::compute(OctreeNode<T>*& p, double x, double y, double z)
   {
     compute(p->top_right_front, x, y, z);
   }
-
 }

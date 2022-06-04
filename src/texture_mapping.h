@@ -18,8 +18,8 @@
 
 enum class RenderMode
 {
-  Simple,
-  Blend,
+  Game,
+  Show,
   Checker
 };
 
@@ -69,12 +69,11 @@ private:
   std::unique_ptr<Model> _cylinder;
   std::unique_ptr<Model> _roundtable;
   std::unique_ptr<Model> _maze;
-  std::unique_ptr<Model> _ground;
   std::unique_ptr<Model> _door;
   std::unique_ptr<Model> _newsphere;
-  std::unique_ptr<Model> _arms;
   std::unique_ptr<Model> _arml;
   std::unique_ptr<Model> _armr;
+  std::unique_ptr<Model> _bear;
 
 
   // npc NPC;
@@ -85,6 +84,10 @@ private:
 
   std::unique_ptr<PerspectiveCamera> _camera;
   std::unique_ptr<DirectionalLight> _light;
+  std::unique_ptr<SpotLight> _spotLight;
+  std::unique_ptr<AmbientLight> _ambientLight;
+
+
 
   std::unique_ptr<LineMaterial> _lineMaterial;
   std::unique_ptr<GLSLProgram> _lineShader;
@@ -98,7 +101,7 @@ private:
 
   std::unique_ptr<SkyBox> _skybox;
 
-  enum RenderMode _renderMode = RenderMode::Simple;
+  enum RenderMode _renderMode = RenderMode::Game;
 
   void initInstancedShader();
 

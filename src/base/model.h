@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <fstream>
 
 #include <glad/glad.h>
 
@@ -13,11 +14,11 @@
 class Model : public Object3D
 {
 public:
-  Model(const std::string& filepath);
+  Model(const std::string &filepath);
 
-  Model(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
+  Model(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices);
 
-  Model(Model&& rhs) noexcept;
+  Model(Model &&rhs) noexcept;
 
   virtual ~Model();
 
@@ -35,11 +36,14 @@ public:
 
   void computeInBoundingBox();
 
-  bool checkBoundingBox(const glm::vec3& point) const; // judge whether in the bounding box
+  bool checkBoundingBox(const glm::vec3 &point) const; // judge whether in the bounding box
 
-  bool checkBoundingBall(const glm::vec3& point) const; // judge whether in the bounding ball
+  bool checkBoundingBall(const glm::vec3 &point) const; // judge whether in the bounding ball
 
-  bool checkInBoundingBox(const glm::vec3& point);
+  std::vector<Vertex> getVertices();
+
+  std::vector<uint32_t> getIndices();
+  bool checkInBoundingBox(const glm::vec3 &point);
 
   void changeBoundingBoxY(const int multiple);
 
@@ -70,7 +74,7 @@ protected:
 
   void cleanup();
 
-  OctreeNode<double>* rootNode = NULL;
+  OctreeNode<double> *rootNode = NULL;
 
   int tmaxdepth = 0;
   double txm = 0;
@@ -78,8 +82,10 @@ protected:
   double tzm = 0;
 
   template <class T>
-  inline bool find(OctreeNode<T>*& p, double x, double y, double z);
+  inline bool find(OctreeNode<T> *&p, double x, double y, double z);
 
   template <class T>
-  inline void compute(OctreeNode<T>*& p, double x, double y, double z);
+  inline void compute(OctreeNode<T> *&p, double x, double y, double z);
 };
+
+bool ExportObj(Model* inputModel);

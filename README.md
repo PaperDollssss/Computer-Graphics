@@ -1,4 +1,22 @@
 # Computer-Graphics Final Project
+
+## Way to Compile
+
+```bash
+cmake -Bbuild .
+cd build
+cmake --build . --parallel 8
+```
+
+对于Windows，修改.//相对路径问题，并将texture_mapping.h中的windows.h解开注释即可
+对于mac，修改../相对路径问题，并将texture_mapping.h中的windows.h注释即可
+CmakeList.txt已修改，无需改动。
+
+## code specification
+
+采用visual studio c++代码规则
+缩进：2空格
+
 ## To Do
 
 **最后记得讲注释里的英文全部删除，清理warning！**
@@ -99,16 +117,3 @@ template <class T>
   inline bool find(OctreeNode<T>*& p, double x, double y, double z);
 ```
 
-
-
-
-## Way to Compile
-
-```bash
-cmake -Bbuild .
-cd build
-cmake --build . --parallel 8
-```
-## code specification
-采用visual studio c++代码规则
-缩进：2空格

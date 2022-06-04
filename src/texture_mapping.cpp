@@ -18,6 +18,8 @@ std::vector<GLuint> roundtableIndices;
 std::vector<Vertex> newsphereVertices;
 std::vector<GLuint> newsphereIndices;
 
+bool importFlag = 0;
+Model *inputModel;
 int _amount = 0;
 float xd = -1.0, yd = 1.0;
 bool knock = true;
@@ -38,31 +40,27 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   _sphere->position = glm::vec3(-10.0f, 5.0f, 0.0f);
   _sphere->computeBoundingBox();
 
-  _bunny.reset(new Model(modelPath1));
-  _bunny->scale = glm::vec3(1.0f, 1.0f, 1.0f);
-  _bunny->position = glm::vec3(10.0f, 5.0f, 0.0f);
-  _bunny->computeBoundingBox();
-
   _maze.reset(new Model(modelPath2));
   _maze->scale = glm::vec3(5.0f, 5.0f, 5.0f);
   _maze->position = glm::vec3(-10.0f, -15.0f, 0.0f);
   _maze->computeBoundingBox();
-  _maze->changeBoundingBoxY(30);//to change the y bounding box for compute
-  _maze->computeInBoundingBox();//add this funtcion if you want to use octree
-
-  _ground.reset(new Model(modelPath3));
-  _ground->scale = glm::vec3(5.0f, 5.0f, 5.0f);
-  _ground->position = glm::vec3(10.0f, 0.0f, 0.0f);
-  _ground->computeBoundingBox();
+  _maze->changeBoundingBoxY(30); // to change the y bounding box for compute
+  _maze->computeInBoundingBox(); // add this funtcion if you want to use octree
 
   _door.reset(new Model(modelPath4));
   _door->scale = glm::vec3(0.05f, 0.05f, 0.05f);
   _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
   _door->computeBoundingBox();
 
-  _arms.reset(new Model(modelPath5));
-  _arms->scale = glm::vec3(3.0f, 3.0f, 3.0f);
-  _arms->computeBoundingBox();
+  _bear.reset(new Model(modelPath8));
+  _bear->scale = glm::vec3(0.1f, 0.1f, 0.1f);
+  _bear->position = glm::vec3(-3.0f, -10.0f, 10.0f);
+  _bear->computeBoundingBox();
+
+  _door.reset(new Model(modelPath4));
+  _door->scale = glm::vec3(0.05f, 0.05f, 0.05f);
+  _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
+  _door->computeBoundingBox();
 
   _arml.reset(new Model(modelPath6));
   _arml->scale = glm::vec3(3.0f, 3.0f, 3.0f);
@@ -145,6 +143,12 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   _light.reset(new DirectionalLight());
   _light->rotation =
       glm::angleAxis(glm::radians(45.0f), -glm::vec3(1.0f, 1.0f, 1.0f));
+
+  _spotLight.reset(new SpotLight());
+  _spotLight->position = glm::vec3(0.0f, 0.0f, 5.0f);
+  _spotLight->rotation = glm::angleAxis(glm::radians(45.0f), -glm::vec3(1.0f, 1.0f, 1.0f));
+
+  _ambientLight.reset(new AmbientLight);
 
   // init shaders
   initSimpleShader();
@@ -319,7 +323,7 @@ void TextureMapping::handleInput()
 
   if (_keyboardInput.keyStates[GLFW_KEY_P] != GLFW_RELEASE)
   {
-    SaveScreenShot(_windowWidth, _windowHeight);
+    // SaveScreenShot(_windowWidth, _windowHeight);
   }
 
   if (_keyboardInput.keyStates[GLFW_KEY_K] != GLFW_RELEASE)
@@ -362,12 +366,6 @@ void TextureMapping::handleInput()
   {
     if (_mouseInput.move.xCurrent != _mouseInput.move.xOld)
     {
-      // if (firstMouse)
-      //{
-      //	_mouseInput.move.xOld = _mouseInput.move.xCurrent;
-      //	_mouseInput.move.yOld = _mouseInput.move.yCurrent;
-      //	firstMouse = false;
-      // }
       double mouse_movement_in_x_direction =
           -(_mouseInput.move.xCurrent - _mouseInput.move.xOld);
       glm::vec3 right = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -375,17 +373,10 @@ void TextureMapping::handleInput()
       camera->rotation =
           glm::quat{(float)cos(thetax / 2), (float)sin(thetax / 2) * right} *
           camera->rotation;
-      //_arml->rotation = camera->rotation;
       _mouseInput.move.xOld = _mouseInput.move.xCurrent;
     }
     if (_mouseInput.move.yCurrent != _mouseInput.move.yOld)
     {
-      // if (firstMouse)
-      //{
-      //	_mouseInput.move.xOld = _mouseInput.move.xCurrent;
-      //	_mouseInput.move.yOld = _mouseInput.move.yCurrent;
-      //	firstMouse = false;
-      // }
       double mouse_movement_in_y_direction =
           -(_mouseInput.move.yCurrent - _mouseInput.move.yOld);
       glm::vec3 up = camera->getRight();
@@ -393,7 +384,6 @@ void TextureMapping::handleInput()
       camera->rotation =
           glm::quat{(float)cos(thetay / 2), (float)sin(thetay / 2) * up} *
           camera->rotation;
-      //_arml->rotation = camera->rotation;
       _mouseInput.move.yOld = _mouseInput.move.yCurrent;
     }
   }
@@ -450,96 +440,88 @@ void TextureMapping::renderFrame()
   // draw planet
   switch (_renderMode)
   {
-  case RenderMode::Simple:
-    // 1. use the shader
-    _simpleShader->use();
-    // 2. transfer mvp matrices to gpu
-    _simpleShader->setMat4("projection", projection);
-    _simpleShader->setMat4("view", view);
-    _simpleShader->setMat4("model", _sphere->getModelMatrix());
-    //    _sphere->draw();
-    _bunny->scale = glm::vec3(y + 0.3, y + 0.3, y + 0.3);
-
-    _shader->use();
-    _shader->setMat4("projection", projection);
-    _shader->setMat4("view", view);
-    //_simpleShader->setMat4("model", _bunny->getModelMatrix());
-    _shader->setMat4("model", _bunny->getModelMatrix());
-    _bunny->draw();
-    //_simpleShader->setMat4("model", _cube->getModelMatrix());
-    _shader->setMat4("model", _cube->getModelMatrix());
-    _cube->draw();
-    _shader->setMat4("model", _cone->getModelMatrix());
-    //    _cone->draw();
-    _shader->setMat4("model", _cylinder->getModelMatrix());
-    //    _cylinder->draw();
-    _shader->setMat4("model", _roundtable->getModelMatrix());
-    _roundtable->draw();
-    _shader->setMat4("model", _newsphere->getModelMatrix());
-    _newsphere->draw();
-    // _shader->setMat4("model", curNPC->getModelMatrix());
-    // curNPC->draw();
-    _shader->setMat4("model", _maze->getModelMatrix());
+  case RenderMode::Game:
+    _blendShader->use();
+    _blendShader->setMat4("projection", projection);
+    _blendShader->setMat4("view", view);
+    _blendShader->setMat4("model", _maze->getModelMatrix());
     _maze->draw();
-    _shader->setMat4("model", _ground->getModelMatrix());
-    _ground->draw();
-
     _armr->position = _camera->position;
-    _shader->setMat4("model", _armr->getModelMatrix());
+    _blendShader->setMat4("model", _armr->getModelMatrix());
     _armr->draw();
     _arml->position = _camera->position;
-    _shader->setMat4("model", _arml->getModelMatrix());
+    _blendShader->setMat4("model", _arml->getModelMatrix());
     _arml->draw();
+    if (((_bear->position.x - _camera->position.x) * (_bear->position.x - _camera->position.x) + (_bear->position.z - _camera->position.z) * (_bear->position.z - _camera->position.z)) < 9.0)
+      if ((_bear->position.y - _camera->position.y) < 1.0 && (_bear->position.y - _camera->position.y) > -1.0)
+      {
+        if (_bear->position.x > _camera->position.x)
+          _bear->position.x -= 0.01 * (3.0 - (_bear->position.x - _camera->position.x));
+        if (_bear->position.x < _camera->position.x)
+          _bear->position.x += 0.01 * (3.0 - (_bear->position.x - _camera->position.x));
+        if (_bear->position.z > _camera->position.z)
+          _bear->position.z -= 0.01 * (3.0 - (_bear->position.z - _camera->position.z));
+        if (_bear->position.z < _camera->position.z)
+          _bear->position.z += 0.01 * (3.0 - (_bear->position.z - _camera->position.z));
+      }
+    _blendShader->setMat4("model", _bear->getModelMatrix());
+    _bear->draw();
 
     if (knock == true)
       _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
     else
       _door->position = glm::vec3(2.0f, 1.0f, 2.0f);
-    _shader->setMat4("model", _door->getModelMatrix());
+    _blendShader->setMat4("model", _door->getModelMatrix());
     _door->draw();
+    _blendShader->setVec3("light.direction", _light->getFront() * XYD);
+    _blendShader->setVec3("light.color", _light->color);
+    _blendShader->setFloat("light.intensity", _light->intensity);
+    _blendShader->setVec3("material.kds[0]", _blendMaterial->kds[0]);
+    _blendShader->setVec3("material.kds[1]", _blendMaterial->kds[1]);
+    _blendShader->setFloat("material.blend", _blendMaterial->blend);
 
-    // draw simple bounding box for test, can be deleted at the final
-    if (boundingmode)
-    {
-      _lineShader->use();
-      _lineShader->setMat4("projection", projection);
-      _lineShader->setMat4("view", view);
-      _lineShader->setVec3("material.color", _lineMaterial->color);
+    _blendShader->setVec3("spotLight.position", _spotLight->position);
+    _blendShader->setVec3("spotLight.direction", _spotLight->getFront());
+    _blendShader->setFloat("spotLight.intensity", _spotLight->intensity);
+    _blendShader->setVec3("spotLight.color", _spotLight->color);
+    _blendShader->setFloat("spotLight.angle", _spotLight->angle);
+    _blendShader->setFloat("spotLight.kc", _spotLight->kc);
+    _blendShader->setFloat("spotLight.kl", _spotLight->kl);
+    _blendShader->setFloat("spotLight.kq", _spotLight->kq);
 
-      _lineShader->setMat4("model", _bunny->getModelMatrix());
-      _bunny->drawBoundingBox();
-      _lineShader->setMat4("model", _roundtable->getModelMatrix());
-      _roundtable->drawBoundingBox();
-      _lineShader->setMat4("model", _newsphere->getModelMatrix());
-      _newsphere->drawBoundingBox();
-      _lineShader->setMat4("model", _cube->getModelMatrix());
-      _cube->drawBoundingBox();
-      _lineShader->setMat4("model", _maze->getModelMatrix());
-      _maze->drawBoundingBox();
-      
-      glLineWidth(_lineMaterial->width);
-    }
-    // 3. enable textures and transform textures to gpu
+    _blendShader->setVec3("ambientLight.color", _ambientLight->color);
+    _blendShader->setFloat("ambientLight.intensity", _ambientLight->intensity);
     glActiveTexture(GL_TEXTURE0);
-    _simpleMaterial->mapKd->bind();
+    _blendMaterial->mapKds[0]->bind();
+    glActiveTexture(GL_TEXTURE1);
+    _blendMaterial->mapKds[1]->bind();
+    _blendShader->setInt("mapKds[1]", 1);
     break;
-  case RenderMode::Blend:
-    // 1. use the shader
+  case RenderMode::Show:
     _blendShader->use();
-    // 2. transfer mvp matrices to gpu
     _blendShader->setMat4("projection", projection);
     _blendShader->setMat4("view", view);
     _blendShader->setMat4("model", _sphere->getModelMatrix());
     _sphere->draw();
-    _bunny->scale = glm::vec3(y + 0.3, y + 0.3, y + 0.3);
-    _blendShader->setMat4("model", _bunny->getModelMatrix());
-    _bunny->draw();
+    if (importFlag)
+    {
+      _bunny->scale = glm::vec3(y + 0.3, y + 0.3, y + 0.3);
+      _blendShader->setMat4("model", _bunny->getModelMatrix());
+      _bunny->draw();
+    }
     _blendShader->setMat4("model", _cube->getModelMatrix());
     _cube->draw();
+    _blendShader->setMat4("model", _cone->getModelMatrix());
+    _cone->draw();
+    _blendShader->setMat4("model", _cylinder->getModelMatrix());
+    _cylinder->draw();
+    _blendShader->setMat4("model", _roundtable->getModelMatrix());
+    _roundtable->draw();
+
     _blendShader->setMat4("model", _maze->getModelMatrix());
     _maze->draw();
-    _blendShader->setMat4("model", _ground->getModelMatrix());
-    _ground->draw();
+    // _blendShader->setMat4("model", curNPC->getModelMatrix());
+    // curNPC->draw();
     if (knock == true)
       _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
     else
@@ -548,16 +530,24 @@ void TextureMapping::renderFrame()
     _door->draw();
     _blendShader->setMat4("model", _newsphere->getModelMatrix());
     _newsphere->draw();
-    // 3. transfer light attributes to gpu
     _blendShader->setVec3("light.direction", _light->getFront() * XYD);
     _blendShader->setVec3("light.color", _light->color);
     _blendShader->setFloat("light.intensity", _light->intensity);
-    // 4. transfer materials to gpu
-    // 4.1 transfer simple material attributes
     _blendShader->setVec3("material.kds[0]", _blendMaterial->kds[0]);
     _blendShader->setVec3("material.kds[1]", _blendMaterial->kds[1]);
-    // 4.2 transfer blend cofficient to gpu
     _blendShader->setFloat("material.blend", _blendMaterial->blend);
+
+    _blendShader->setVec3("spotLight.position", _spotLight->position);
+    _blendShader->setVec3("spotLight.direction", _spotLight->getFront());
+    _blendShader->setFloat("spotLight.intensity", _spotLight->intensity);
+    _blendShader->setVec3("spotLight.color", _spotLight->color);
+    _blendShader->setFloat("spotLight.angle", _spotLight->angle);
+    _blendShader->setFloat("spotLight.kc", _spotLight->kc);
+    _blendShader->setFloat("spotLight.kl", _spotLight->kl);
+    _blendShader->setFloat("spotLight.kq", _spotLight->kq);
+
+    _blendShader->setVec3("ambientLight.color", _ambientLight->color);
+    _blendShader->setFloat("ambientLight.intensity", _ambientLight->intensity);
 
     glActiveTexture(GL_TEXTURE0);
     _blendMaterial->mapKds[0]->bind();
@@ -566,24 +556,44 @@ void TextureMapping::renderFrame()
     _blendShader->setInt("mapKds[1]", 1);
     break;
   case RenderMode::Checker:
-    // 1. use the shader
     _checkerShader->use();
-    // 2. transfer mvp matrices to gpu
     _checkerShader->setMat4("projection", projection);
     _checkerShader->setMat4("view", view);
     _checkerShader->setMat4("model", _sphere->getModelMatrix());
     _sphere->draw();
-    _bunny->scale = glm::vec3(y + 0.3, y + 0.3, y + 0.3);
-    _checkerShader->setMat4("model", _bunny->getModelMatrix());
-    _bunny->draw();
+    if (importFlag)
+    {
+      _bunny->scale = glm::vec3(y + 0.3, y + 0.3, y + 0.3);
+      _checkerShader->setMat4("model", _bunny->getModelMatrix());
+      _bunny->draw();
+    }
     _checkerShader->setMat4("model", _cube->getModelMatrix());
     _cube->draw();
-    // 3. transfer material attributes to gpu
     _checkerShader->setInt("material.repeat", _checkerMaterial->repeat);
     _checkerShader->setVec3("material.colors[0]", _checkerMaterial->colors[0]);
     _checkerShader->setVec3("material.colors[1]", _checkerMaterial->colors[1]);
     break;
   }
+
+  _lineShader->use();
+  _lineShader->setMat4("projection", projection);
+  _lineShader->setMat4("view", view);
+  _lineShader->setVec3("material.color", _lineMaterial->color);
+
+  if (importFlag)
+  {
+    _lineShader->setMat4("model", _bunny->getModelMatrix());
+    _bunny->drawBoundingBox();
+  }
+  _lineShader->setMat4("model", _roundtable->getModelMatrix());
+  _roundtable->drawBoundingBox();
+  _lineShader->setMat4("model", _newsphere->getModelMatrix());
+  _newsphere->drawBoundingBox();
+  _lineShader->setMat4("model", _cube->getModelMatrix());
+  _cube->drawBoundingBox();
+  _lineShader->setMat4("model", _maze->getModelMatrix());
+  _maze->drawBoundingBox();
+  glLineWidth(_lineMaterial->width);
 
   _skybox->draw(projection, view);
 
@@ -602,12 +612,12 @@ void TextureMapping::renderFrame()
   {
     ImGui::Text("Render Mode");
     ImGui::Separator();
-    ImGui::RadioButton("Simple Texture Shading", (int *)&_renderMode,
-                       (int)(RenderMode::Simple));
+    ImGui::RadioButton("Game", (int *)&_renderMode,
+                       (int)(RenderMode::Game));
     ImGui::NewLine();
 
-    ImGui::RadioButton("Blend Texture Shading", (int *)&_renderMode,
-                       (int)(RenderMode::Blend));
+    ImGui::RadioButton("Show", (int *)&_renderMode,
+                       (int)(RenderMode::Show));
     ImGui::ColorEdit3("kd1", (float *)&_blendMaterial->kds[0]);
     ImGui::ColorEdit3("kd2", (float *)&_blendMaterial->kds[1]);
     ImGui::SliderFloat("blend", &_blendMaterial->blend, 0.0f, 1.0f);
@@ -622,13 +632,46 @@ void TextureMapping::renderFrame()
     ImGui::Checkbox("boundingbox", &boundingmode);
     ImGui::NewLine();
 
-    ImGui::Text("Directional light");
+    ImGui::Text("Directional Light");
     ImGui::Separator();
     ImGui::SliderFloat("intensity", &_light->intensity, 0.0f, 2.0f);
     ImGui::SliderFloat("xd", &xd, -2.0f, 2.0f);
     ImGui::SliderFloat("yd", &yd, -2.0f, 2.0f);
     ImGui::ColorEdit3("color", (float *)&_light->color);
     ImGui::NewLine();
+
+    ImGui::Text("Ambient light");
+    ImGui::Separator();
+    ImGui::SliderFloat("intensity##5", &_ambientLight->intensity, 0.0f, 10.0f);
+    ImGui::ColorEdit3("color##1", (float *)&_ambientLight->color);
+    ImGui::NewLine();
+
+    ImGui::Text("spot light");
+    ImGui::Separator();
+    ImGui::SliderFloat("intensity##3", &_spotLight->intensity, 0.0f, 1.5f);
+    ImGui::ColorEdit3("color##3", (float *)&_spotLight->color);
+    ImGui::SliderFloat("angle##3", (float *)&_spotLight->angle, 0.0f, glm::radians(180.0f), "%f rad");
+    ImGui::NewLine();
+
+    // ImGui::Separator();
+    // ImGui::RadioButton("Show bounding Box", (int *)&_renderMode,
+    //                    (int)(RenderMode::Simple));
+    // ImGui::NewLine();
+    ImGui::Text("OBJ Export");
+    if (ImGui::Button("Import"))
+    {
+      importFlag = 1;
+      inputModel = new Model(modelPath1);
+      _bunny.reset(inputModel);
+      _bunny->scale = glm::vec3(1.0f, 1.0f, 1.0f);
+      _bunny->position = glm::vec3(10.0f, 5.0f, 0.0f);
+      _bunny->computeBoundingBox();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Export"))
+    {
+      bool flag = ExportObj(inputModel);
+    }
 
     ImGui::End();
   }
@@ -639,8 +682,6 @@ void TextureMapping::renderFrame()
 
 bool TextureMapping::checkBounding(const glm::vec3 &positon)
 {
-  if (_bunny->checkBoundingBox(positon))
-    return true;
   if (_cube->checkBoundingBox(positon))
     return true;
   if (_roundtable->checkBoundingBox(positon))
