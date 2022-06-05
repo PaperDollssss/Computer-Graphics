@@ -75,7 +75,6 @@ private:
   std::unique_ptr<Model> _armr;
   std::unique_ptr<Model> _bear;
 
-
   // npc NPC;
 
   std::unique_ptr<SimpleMaterial> _simpleMaterial;
@@ -87,8 +86,6 @@ private:
   std::unique_ptr<DirectionalLight> _light;
   std::unique_ptr<SpotLight> _spotLight;
   std::unique_ptr<AmbientLight> _ambientLight;
-
-
 
   std::unique_ptr<LineMaterial> _lineMaterial;
   std::unique_ptr<GLSLProgram> _lineShader;

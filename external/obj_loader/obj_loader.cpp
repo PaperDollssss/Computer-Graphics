@@ -7,6 +7,9 @@
 #include <sstream>
 #include <string>
 
+std::vector<float> ve, ne;
+std::vector<float> te;
+
 namespace obj
 {
   typedef struct
@@ -23,6 +26,7 @@ namespace obj
     std::ifstream in(filePath, std::ios::in);
     if (!in.is_open())
       return false;
+    bool eFlag = false;
     std::string name;
     std::string strLine;
     std::vector<float> v;
@@ -30,6 +34,8 @@ namespace obj
     std::vector<float> vt;
     std::vector<vertex> vertices;
     std::vector<std::vector<vertex>> faces;
+    if (filePath == "../media/rock.obj")
+      eFlag = true;
     while (getline(in, strLine))
     {
       std::istringstream ins(strLine);
@@ -44,6 +50,12 @@ namespace obj
           vn.push_back(std::stof(x));
           vn.push_back(std::stof(y));
           vn.push_back(std::stof(z));
+          if (eFlag)
+          {
+            ne.push_back(std::stof(x));
+            ne.push_back(std::stof(y));
+            ne.push_back(std::stof(z));
+          }
           continue;
         }
         else if (strLine[1] == 't')
@@ -52,6 +64,11 @@ namespace obj
           ins >> vv >> x >> y;
           vt.push_back(std::stof(x));
           vt.push_back(std::stof(y));
+          if (eFlag)
+          {
+            te.push_back(std::stof(x));
+            te.push_back(std::stof(y));
+          }
           continue;
         }
         else
@@ -61,6 +78,12 @@ namespace obj
           v.push_back(std::stof(x));
           v.push_back(std::stof(y));
           v.push_back(std::stof(z));
+          if (eFlag)
+          {
+            ve.push_back(std::stof(x));
+            ve.push_back(std::stof(y));
+            ve.push_back(std::stof(z));
+          }
           continue;
         }
       }
