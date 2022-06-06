@@ -68,9 +68,411 @@ CmakeList.txt已修改，无需改动。
 ### 1.1
 ### 1.2 Module introduction
 
-
-
 ## Module implementation
+
+### 基本体素建模表达
+
+立方体建模：直接利用每个点的坐标进行绘制。
+
+```c++
+void genCube(std::vector<Vertex> &cubeVertices,
+             std::vector<uint32_t> &cubeIndices) {
+  Vertex v[6];
+  int faces = 0;
+  // 顶点坐标
+  const glm::vec3 p[8] = {
+      glm::vec3(1.0f, 1.0f, -1.0f),   glm::vec3(1.0f, 1.0f, 1.0f),
+      glm::vec3(-1.0f, 1.0f, -1.0f),  glm::vec3(-1.0f, 1.0f, 1.0f),
+      glm::vec3(1.0f, -1.0f, -1.0f),  glm::vec3(1.0f, -1.0f, 1.0f),
+      glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(-1.0f, -1.0f, 1.0f),
+  };
+  // 第一个面信息
+  glm::vec3 norm;
+  norm = glm::vec3(0.0f, -1.0f, 0.0f);
+  v[0].position = p[4];
+  v[1].position = p[5];
+  v[2].position = p[6];
+  v[3].position = p[5];
+  v[4].position = p[6];
+  v[5].position = p[7];
+  v[0].normal = norm;
+  v[1].normal = norm;
+  v[2].normal = norm;
+  v[3].normal = norm;
+  v[4].normal = norm;
+  v[5].normal = norm;
+  v[0].texCoord = glm::vec2(0.0f, 1.0f);
+  v[1].texCoord = glm::vec2(1.0f, 1.0f);
+  v[2].texCoord = glm::vec2(0.0f, 0.0f);
+  v[3].texCoord = glm::vec2(1.0f, 1.0f);
+  v[4].texCoord = glm::vec2(0.0f, 0.0f);
+  v[5].texCoord = glm::vec2(1.0f, 0.0f);
+  for (int i = 0; i < 6; i++) {
+    cubeVertices.push_back(v[i]);
+    cubeIndices.push_back(6 * faces + i);
+  }
+  // 另外五个面相似
+  // ...
+}
+```
+
+
+
+相对复杂基本体：以圆锥为例，利用多个三角形网格绘制基本体素，当三角形数量够多就能逼近基本体素的形态。
+
+```c++
+void genCone(std::vector<Vertex> &coneVertices,
+             std::vector<uint32_t> &coneIndices) {
+  // 参数初始化
+  int num_stacks = 100;
+  double angle = 2 * M_PI / num_stacks;
+  int faces = 0, i = 0;
+  float radius = 3;
+  float height = 5;
+  Vertex tmp[3];
+  glm::vec3 norm;
+  tmp[0].position = glm::vec3(0.0f, 0.0f, 0.0f);
+  tmp[1].position =
+      glm::vec3(radius * cos(i * angle), 0, radius * sin(i * angle));
+  tmp[2].position = glm::vec3(radius * cos((i + 1) * angle), 0,
+                              radius * sin((i + 1) * angle));
+  tmp[0].normal = glm::vec3(0.0f, -1.0f, 0.0f);
+  tmp[1].normal = glm::vec3(0.0f, -1.0f, 0.0f);
+  tmp[2].normal = glm::vec3(0.0f, -1.0f, 0.0f);
+  // 移动底部圆周的点，求出底面三角形相关参数
+  for (i = 0; i < num_stacks; i++, faces++) {
+    tmp[1].position = tmp[2].position;
+    tmp[2].position = glm::vec3(radius * cos((i + 2) * angle), 0,
+                                radius * sin((i + 2) * angle));
+    coneVertices.push_back(tmp[0]);
+    coneVertices.push_back(tmp[1]);
+    coneVertices.push_back(tmp[2]);
+    coneIndices.push_back(faces * 3 + 0);
+    coneIndices.push_back(faces * 3 + 1);
+    coneIndices.push_back(faces * 3 + 2);
+  }
+  tmp[0].position = glm::vec3(0.0f, height, 0.0f);
+  tmp[1].position =
+      glm::vec3(radius * cos(i * angle), 0, radius * sin(i * angle));
+  tmp[2].position = glm::vec3(radius * cos((i + 1) * angle), 0,
+                              radius * sin((i + 1) * angle));
+  tmp[0].normal = glm::vec3(0.0f, 1.0f, 0.0f);
+  // 移动底部圆周的点，求出侧面三角形相关参数
+  for (i = 0; i < num_stacks; i++, faces++) {
+    tmp[1].position = tmp[2].position;
+    tmp[2].position = glm::vec3(radius * cos((i + 2) * angle), 0, radius * sin((i + 2) * angle));
+    glm::vec3 norm = -calNorm(tmp[1].position, tmp[2].position, tmp[0].position);
+    tmp[0].normal = norm;
+    tmp[1].normal = norm;
+    tmp[2].normal = norm;
+    coneVertices.push_back(tmp[0]);
+    coneVertices.push_back(tmp[1]);
+    coneVertices.push_back(tmp[2]);
+    coneIndices.push_back(faces * 3 + 0);
+    coneIndices.push_back(faces * 3 + 1);
+    coneIndices.push_back(faces * 3 + 2);
+  }
+}
+```
+
+### OBJ格式文件的读入与导出
+
+OBJ文件读入：由于不要求解析mtl文件，因此只需要关注文件信息中的顶点数据，顶点索引以及网格信息。
+
+```c++
+// attrib_o用于记录顶点的数据
+typedef struct
+  {
+    std::vector<float> vertices;
+    std::vector<float> norms;
+    std::vector<float> texts;
+  } attrib_o;
+```
+
+```c++
+// index_o用于记录顶点的索引信息
+typedef struct
+  {
+    int v_index;
+    int n_index;
+    int t_index;
+  } index_o;
+```
+
+```c++
+// mesh_o用来记录网格信息
+  typedef struct
+  {
+    std::vector<index_o> indices;
+    std::vector<unsigned char> num_face_vertices;
+  } mesh_o;
+```
+
+```c++
+#include "obj_loader.h"
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <string>
+
+namespace obj
+{
+  typedef struct
+  {
+    int p_index;
+    int t_index;
+    int n_index;
+  } vertex;
+  
+  // 该函数将面转为网格
+  bool exportFaceGroupToShape(shape_o &shape, const std::vector<std::vector<vertex>> &faces, const std::string &name, bool triangulate);
+
+  bool LoadObj(attrib_o &_attrib, std::vector<shape_o> &shapes, std::string filePath, bool triangulate)
+  {
+    std::ifstream in(filePath, std::ios::in);
+    if (!in.is_open())
+      return false;
+    bool eFlag = false;
+    std::string name;
+    std::string strLine;
+    // 用于记录顶点数据
+    std::vector<float> v;
+    std::vector<float> vn;
+    std::vector<float> vt;
+    std::vector<vertex> vertices;
+    std::vector<std::vector<vertex>> faces;
+    // 读取数据
+    while (getline(in, strLine))
+    {
+      std::istringstream ins(strLine);
+      if (strLine.empty() || strLine[0] == '#')
+        continue;
+      if (strLine[0] == 'v')
+      {
+        // 读到vn说明是顶点法线数据
+        if (strLine[1] == 'n')
+        {
+          // 记录相关数据 进入下次循环
+          std::string x, y, z, vv;
+          ins >> vv >> x >> y >> z;
+          vn.push_back(std::stof(x));
+          vn.push_back(std::stof(y));
+          vn.push_back(std::stof(z));
+          continue;
+        }
+        // 读到vn说明是顶点纹理数据
+        else if (strLine[1] == 't')
+        {
+					// 记录相关数据
+          // ...
+        }
+        else
+        {
+          // 记录相关数据
+          // ...
+        }
+      }
+      // 若读到f 要注意其格式 不同格式包含的数据种类不同
+      else if (strLine[0] == 'f')
+      {
+        std::string ff;
+        ins >> ff;
+        std::vector<vertex> face;
+        size_t pos1, pos2;
+        std::string tmp1, tmp2;
+
+        ins >> tmp1;
+        pos1 = tmp1.find_first_of('/');
+        tmp2 = tmp1.substr(pos1 + 1);
+        pos2 = tmp2.find_first_of('/') + tmp1.length() - tmp2.length();
+        // 双斜杠情况下不包含纹理信息
+        if ((pos2 - pos1) == 1)
+        {
+          for (int i = 0;; i++)
+          {
+            size_t pos;
+            vertex vert;
+            std::string index_v, index_vn, str;
+            if (i == 0)
+              str = tmp1;
+            else
+            {
+              if (ins >> str)
+                ;
+              else
+                break;
+            }
+            pos = str.find_first_of('/');
+            index_v = str.substr(0, pos);
+            index_vn = str.substr(pos + 2);
+            vert.p_index = std::stoi(index_v) - 1;
+            vert.n_index = std::stoi(index_vn) - 1;
+            face.push_back(vert);
+          }
+          faces.push_back(face);
+          continue;
+        }
+        // 包含纹理信息
+        else
+        {
+          // 数据读取
+          // ...
+        }
+      }
+      // 读到g将面转换为网格
+      else if (strLine[0] == 'g')
+      {
+        shape_o shape;
+        bool flag = exportFaceGroupToShape(shape, faces, name, triangulate);
+        // 导出网格
+        if (flag)
+          shapes.push_back(shape);
+        faces.clear();
+        std::vector<std::string> names;
+        names.reserve(2);
+        std::string gg, name_str;
+        ins >> gg >> name_str;
+        name = name_str;
+        continue;
+      }
+      // 其余情况不用处理
+      else
+      {
+        continue;
+      }
+    }
+    // 最后一次导出网格
+    shape_o shape;
+    bool flag = exportFaceGroupToShape(shape, faces, name, triangulate);
+    if (flag)
+      shapes.push_back(shape);
+    faces.clear();
+    _attrib.vertices.swap(v);
+    _attrib.texts.swap(vt);
+    _attrib.norms.swap(vn);
+    return true;
+  }
+
+  bool exportFaceGroupToShape(shape_o &shape, const std::vector<std::vector<vertex>> &faces, const std::string &name, bool triangulate)
+  {
+    for (int i = 0; i < faces.size(); i++)
+    {
+      std::vector<vertex> face = faces[i];
+      vertex v0 = face[0];
+      vertex v1;
+      vertex v2 = face[1];
+      size_t n = face.size();
+      // 三角面情况 只需记录三个点数据
+      if (triangulate)
+      {
+        // 记录每点数据 导出网格
+        // ...
+      }
+      // 多边形构成网格
+      else
+      {
+        for (size_t k = 0; k < n; k++)
+        {
+          index_o iv;
+          iv.v_index = face[k].p_index;
+          iv.n_index = face[k].n_index;
+          iv.t_index = face[k].t_index;
+          shape.mesh.indices.push_back(iv);
+        }
+        shape.mesh.num_face_vertices.push_back(n);
+      }
+    }
+
+    shape.name = name;
+    return true;
+  }
+}
+```
+
+### 连续帧绘制
+
+目的：将多个具有连续动作的obj文件连续绘制，实现动画效果。
+
+原理：将多个obj文件预先导入某个容器，在每帧绘制时切换并循环绘制即可。
+
+以下为连续帧绘制对象相关类
+
+```c++
+#ifndef FINAL_PROJECT_SRC_NPC_H_
+#define FINAL_PROJECT_SRC_NPC_H_
+#include "base/model.h"
+#include <memory>
+#include <string>
+#include <vector>
+
+// 使用智能指针存放每一个对象，用容器存储，调用函数即可实现连续帧绘制
+class npc
+{
+public:
+  npc();
+  std::shared_ptr<Model> changeModel();
+  ~npc() = default;
+
+private:
+  int count;
+  int index;
+  std::vector<std::shared_ptr<Model>> _npcVector;
+};
+
+#endif
+```
+
+```c++
+npc::npc()
+{
+  index = 0;
+  count = 0;
+  for (int i = 0; i <= 100; i++)
+  {
+    std::string filePath = "../media/postures/pose";
+    // count值不同时文件路径不同
+    if (count < 10)
+    {
+      filePath += "00";
+      filePath += std::to_string(count);
+    }
+    else if (count < 100)
+    {
+      filePath += "0";
+      filePath += std::to_string(count);
+    }
+    else
+    {
+      filePath += std::to_string(count);
+    }
+    filePath += ".obj";
+    // 利用智能指针存放每个npc单元，最终放入容器
+    std::shared_ptr<Model> _npc;
+    _npc.reset(new Model(filePath));
+    _npc->scale = glm::vec3(0.01f, 0.01f, 0.01f);
+    _npc->position = glm::vec3(-5, -5, -5);
+    _npcVector.push_back(_npc);
+    count++;
+  }
+}
+```
+
+每次渲染时调用changeModel函数即可实现连续帧绘制
+
+```c++
+std::shared_ptr<Model> npc::changeModel()
+{
+  std::shared_ptr<Model> curNPC = _npcVector[index];
+  if (index < 100)
+    index++;
+  else
+    index = 0;
+  return curNPC;
+}
+```
+
+
+
 ### 碰撞检测
 简单写一下包围盒与八叉树实现碰撞检测的部分原理
 #### 包围盒
@@ -124,3 +526,9 @@ template <class T>
   inline bool find(OctreeNode<T>*& p, double x, double y, double z);
 ```
 
+## 玩法相关
+
+### 快捷键
+
+n：回到出生点
+m：回到终点
