@@ -6,6 +6,7 @@
 
 # For windows
 /.vscode
+/.vs
 
 # For all
 /build
