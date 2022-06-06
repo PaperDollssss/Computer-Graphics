@@ -22,7 +22,7 @@ std::vector<GLuint> newsphereIndices;
 bool gameOver = false;
 bool importFlag = 0;
 bool show_another_window = false;
-Model* inputModel;
+Model *inputModel;
 int _amount = 0;
 float xd = -1.0, yd = 1.0;
 bool knock = true;
@@ -33,7 +33,7 @@ int hint = 1;
 glm::vec3 camtemp;
 double neng = 0.0;
 
-TextureMapping::TextureMapping(const Options& options) : Application(options)
+TextureMapping::TextureMapping(const Options &options) : Application(options)
 {
   genCube(cubeVertices, cubeIndices);
   genCone(coneVertices, coneIndices);
@@ -54,11 +54,6 @@ TextureMapping::TextureMapping(const Options& options) : Application(options)
   _maze->changeBoundingBoxY(30); // to change the y bounding box for compute
   _maze->computeInBoundingBox(); // add this funtcion if you want to use octree
 
-  _door.reset(new Model(modelPath4));
-  _door->scale = glm::vec3(0.05f, 0.05f, 0.05f);
-  _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
-  _door->computeBoundingBox();
-
   _bear0.reset(new Model(modelPath8));
   _bear0->scale = glm::vec3(0.1f, 0.1f, 0.1f);
   _bear0->position = glm::vec3(-4.0f, -14.1f, 11.0f);
@@ -69,11 +64,9 @@ TextureMapping::TextureMapping(const Options& options) : Application(options)
   _bear1->position = glm::vec3(-4.0f, -14.1f, 11.0f);
   _bear1->computeBoundingBox();
 
-
   _door.reset(new Model(modelPath4));
-  _door->scale = glm::vec3(0.05f, 0.05f, 0.05f);
-  _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
-  _door->computeBoundingBox();
+  _door->scale = glm::vec3(0.08f, 0.08f, 0.08f);
+  //_door->computeBoundingBox();
 
   _arml.reset(new Model(modelPath6));
   _arml->scale = glm::vec3(3.0f, 3.0f, 3.0f);
@@ -107,15 +100,14 @@ TextureMapping::TextureMapping(const Options& options) : Application(options)
   _newsphere->scale = glm::vec3(2.0f, 2.0f, 2.0f);
   _newsphere->position = glm::vec3(40.0f, 5.0f, 0.0f);
   _newsphere->computeBoundingBox();
-  //_newsphere->computeInBoundingBox();
 
   // init textures
   std::shared_ptr<Texture2D> earthTexture =
-    std::make_shared<Texture2D>(earthTexturePath);
+      std::make_shared<Texture2D>(earthTexturePath);
   std::shared_ptr<Texture2D> planetTexture =
-    std::make_shared<Texture2D>(planetTexturePath);
+      std::make_shared<Texture2D>(planetTexturePath);
   std::shared_ptr<Texture2D> groundTexture =
-    std::make_shared<Texture2D>(groundTexturePath);
+      std::make_shared<Texture2D>(groundTexturePath);
 
   // init materials
   _simpleMaterial.reset(new SimpleMaterial);
@@ -142,22 +134,22 @@ TextureMapping::TextureMapping(const Options& options) : Application(options)
 
   // init camera
   _camera.reset(new PerspectiveCamera(glm::radians(50.0f),
-    1.0f * _windowWidth / _windowHeight, 0.1f,
-    10000.0f));
+                                      1.0f * _windowWidth / _windowHeight, 0.1f,
+                                      10000.0f));
   _camera->position.z = 10.0f;
   _camera->rotation =
-    glm::lookAt(glm::vec3(0.0, 0.0, 3.0), glm::vec3(0.0, 0.0, 0.0),
-      glm::vec3(0.0, 1.0, 0.0));
+      glm::lookAt(glm::vec3(0.0, 0.0, 3.0), glm::vec3(0.0, 0.0, 0.0),
+                  glm::vec3(0.0, 1.0, 0.0));
   glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   _mouseInput.move.xOld = _mouseInput.move.xCurrent = 0.5 * _windowWidth;
   _mouseInput.move.yOld = _mouseInput.move.yCurrent = 0.5 * _windowHeight;
   glfwSetCursorPos(_window, _mouseInput.move.xCurrent,
-    _mouseInput.move.yCurrent);
+                   _mouseInput.move.yCurrent);
 
   // init light
   _light.reset(new DirectionalLight());
   _light->rotation =
-    glm::angleAxis(glm::radians(45.0f), -glm::vec3(1.0f, 1.0f, 1.0f));
+      glm::angleAxis(glm::radians(45.0f), -glm::vec3(1.0f, 1.0f, 1.0f));
 
   _spotLight.reset(new SpotLight());
   _spotLight->position = glm::vec3(0.0f, 0.0f, 5.0f);
@@ -182,7 +174,7 @@ TextureMapping::TextureMapping(const Options& options) : Application(options)
   // init bounding mode
   boundingmode = true;
 
-  //add music
+  // add music
 #if _WIN32
   PlayMusic(musicPath);
 #endif
@@ -211,7 +203,7 @@ void TextureMapping::handleInput()
         _mouseInput.move.xOld = _mouseInput.move.xCurrent = 0.5 * _windowWidth;
         _mouseInput.move.yOld = _mouseInput.move.yCurrent = 0.5 * _windowHeight;
         glfwSetCursorPos(_window, _mouseInput.move.xCurrent,
-          _mouseInput.move.yCurrent);
+                         _mouseInput.move.yCurrent);
         cursorvisible++;
       }
       else
@@ -220,7 +212,7 @@ void TextureMapping::handleInput()
         _mouseInput.move.xOld = _mouseInput.move.xCurrent = 0.5 * _windowWidth;
         _mouseInput.move.yOld = _mouseInput.move.yCurrent = 0.5 * _windowHeight;
         glfwSetCursorPos(_window, _mouseInput.move.xCurrent,
-          _mouseInput.move.yCurrent);
+                         _mouseInput.move.yCurrent);
         cursorvisible++;
       }
       YES = false;
@@ -269,7 +261,7 @@ void TextureMapping::handleInput()
   {
     _sphere->scale -= glm::vec3(0.03f, 0.03f, 0.03f);
     if (_sphere->scale.x < 0.03 || _sphere->scale.y < 0.03 ||
-      _sphere->scale.z < 0.03)
+        _sphere->scale.z < 0.03)
       _sphere->scale = glm::vec3(0.03f, 0.03f, 0.03f);
   }
   if (_keyboardInput.keyStates[GLFW_KEY_R] != GLFW_RELEASE)
@@ -299,18 +291,18 @@ void TextureMapping::handleInput()
   if (_keyboardInput.keyStates[GLFW_KEY_SPACE] == GLFW_PRESS)
   {
     _camera.reset(new PerspectiveCamera(glm::radians(50.0f),
-      1.0f * _windowWidth / _windowHeight,
-      0.1f, 10000.0f));
+                                        1.0f * _windowWidth / _windowHeight,
+                                        0.1f, 10000.0f));
     _camera->position.z = 0.0f;
     _camera->rotation =
-      glm::lookAt(glm::vec3(0.0, 0.0, 3.0), glm::vec3(0.0, 0.0, 0.0),
-        glm::vec3(0.0, 1.0, 0.0));
+        glm::lookAt(glm::vec3(0.0, 0.0, 3.0), glm::vec3(0.0, 0.0, 0.0),
+                    glm::vec3(0.0, 1.0, 0.0));
   }
   if (_keyboardInput.keyStates[GLFW_KEY_B] == GLFW_PRESS)
   {
     _camera->fovy = 0.872664;
   }
-  Camera* camera = _camera.get();
+  Camera *camera = _camera.get();
   if (_keyboardInput.keyStates[GLFW_KEY_O] != GLFW_RELEASE)
   {
     // cameraPos = cameraMoveSpeed * cameraFront;
@@ -465,7 +457,7 @@ void TextureMapping::handleInput()
       _mouseInput.move.xOld = _mouseInput.move.xCurrent = 0.5 * _windowWidth;
       _mouseInput.move.yOld = _mouseInput.move.yCurrent = 0.5 * _windowHeight;
       glfwSetCursorPos(_window, _mouseInput.move.xCurrent,
-        _mouseInput.move.yCurrent);
+                       _mouseInput.move.yCurrent);
       cursorvisible++;
     }
     else
@@ -474,7 +466,7 @@ void TextureMapping::handleInput()
       _mouseInput.move.xOld = _mouseInput.move.xCurrent = 0.5 * _windowWidth;
       _mouseInput.move.yOld = _mouseInput.move.yCurrent = 0.5 * _windowHeight;
       glfwSetCursorPos(_window, _mouseInput.move.xCurrent,
-        _mouseInput.move.yCurrent);
+                       _mouseInput.move.yCurrent);
       cursorvisible++;
     }
     YES = false;
@@ -484,23 +476,23 @@ void TextureMapping::handleInput()
     if (_mouseInput.move.xCurrent != _mouseInput.move.xOld)
     {
       double mouse_movement_in_x_direction =
-        -(_mouseInput.move.xCurrent - _mouseInput.move.xOld);
+          -(_mouseInput.move.xCurrent - _mouseInput.move.xOld);
       glm::vec3 right = glm::vec3(0.0f, 1.0f, 0.0f);
       double thetax = 0.003 * mouse_movement_in_x_direction;
       camera->rotation =
-        glm::quat{ (float)cos(thetax / 2), (float)sin(thetax / 2) * right } *
-        camera->rotation;
+          glm::quat{(float)cos(thetax / 2), (float)sin(thetax / 2) * right} *
+          camera->rotation;
       _mouseInput.move.xOld = _mouseInput.move.xCurrent;
     }
     if (_mouseInput.move.yCurrent != _mouseInput.move.yOld)
     {
       double mouse_movement_in_y_direction =
-        -(_mouseInput.move.yCurrent - _mouseInput.move.yOld);
+          -(_mouseInput.move.yCurrent - _mouseInput.move.yOld);
       glm::vec3 up = camera->getRight();
       double thetay = 0.003 * mouse_movement_in_y_direction;
       camera->rotation =
-        glm::quat{ (float)cos(thetay / 2), (float)sin(thetay / 2) * up } *
-        camera->rotation;
+          glm::quat{(float)cos(thetay / 2), (float)sin(thetay / 2) * up} *
+          camera->rotation;
       _mouseInput.move.yOld = _mouseInput.move.yCurrent;
     }
   }
@@ -519,7 +511,7 @@ void TextureMapping::handleInput()
 void TextureMapping::renderFrame()
 {
 
-  glm::vec3 XYD{ xd, yd, 1.0f };
+  glm::vec3 XYD{xd, yd, 1.0f};
   static bool wireframe = false;
   showFpsInWindowTitle();
 
@@ -571,46 +563,53 @@ void TextureMapping::renderFrame()
     _blendShader->setMat4("model", _arml->getModelMatrix());
     _arml->draw();
 
-    if ((((_bear0->position.x - _camera->position.x) * (_bear0->position.x - _camera->position.x) + (_bear0->position.z - _camera->position.z) * (_bear0->position.z - _camera->position.z)) < 9.0)
-        && (((_bear0->position.x - _camera->position.x) * (_bear0->position.x - _camera->position.x) + (_bear0->position.z - _camera->position.z) * (_bear0->position.z - _camera->position.z)) >= 1.0))
-        if ((_bear0->position.y - _camera->position.y) < 1.0 && (_bear0->position.y - _camera->position.y) > -1.0)
-        {
-            if (_bear0->position.x > _camera->position.x)
-                _bear0->position.x -= 0.01 * (3.0 - (_bear0->position.x - _camera->position.x));
-            if (_bear0->position.x < _camera->position.x)
-                _bear0->position.x += 0.01 * (3.0 - (_bear0->position.x - _camera->position.x));
-            if (_bear0->position.z > _camera->position.z)
-                _bear0->position.z -= 0.01 * (3.0 - (_bear0->position.z - _camera->position.z));
-            if (_bear0->position.z < _camera->position.z)
-                _bear0->position.z += 0.01 * (3.0 - (_bear0->position.z - _camera->position.z));
-        }
-    if (((_bear0->position.x - _camera->position.x) * (_bear0->position.x - _camera->position.x) + (_bear0->position.z - _camera->position.z) * (_bear0->position.z - _camera->position.z)) <= 1.0) {
-        _spotLight->position = _camera->position + glm::vec3(0.0f, 0.0f, 0.0f);
-        _spotLight->rotation = glm::angleAxis(glm::radians(0.0f), -glm::vec3(1.0f, 1.0f, 1.0f));
-        if (neng < 0.6) {
-            neng += 0.001;
-            _spotLight->angle = neng;
-        }
-        _spotLight->color = { 1.0f, 0.0f, 0.0f };
-        _light->intensity = 0.0;
-
+    if ((((_bear0->position.x - _camera->position.x) * (_bear0->position.x - _camera->position.x) + (_bear0->position.z - _camera->position.z) * (_bear0->position.z - _camera->position.z)) < 9.0) && (((_bear0->position.x - _camera->position.x) * (_bear0->position.x - _camera->position.x) + (_bear0->position.z - _camera->position.z) * (_bear0->position.z - _camera->position.z)) >= 1.0))
+      if ((_bear0->position.y - _camera->position.y) < 1.0 && (_bear0->position.y - _camera->position.y) > -1.0)
+      {
+        if (_bear0->position.x > _camera->position.x)
+          _bear0->position.x -= 0.01 * (3.0 - (_bear0->position.x - _camera->position.x));
+        if (_bear0->position.x < _camera->position.x)
+          _bear0->position.x += 0.01 * (3.0 - (_bear0->position.x - _camera->position.x));
+        if (_bear0->position.z > _camera->position.z)
+          _bear0->position.z -= 0.01 * (3.0 - (_bear0->position.z - _camera->position.z));
+        if (_bear0->position.z < _camera->position.z)
+          _bear0->position.z += 0.01 * (3.0 - (_bear0->position.z - _camera->position.z));
+      }
+    if (((_bear0->position.x - _camera->position.x) * (_bear0->position.x - _camera->position.x) + (_bear0->position.z - _camera->position.z) * (_bear0->position.z - _camera->position.z)) <= 1.0)
+    {
+      _spotLight->position = _camera->position + glm::vec3(0.0f, 0.0f, 0.0f);
+      _spotLight->rotation = glm::angleAxis(glm::radians(0.0f), -glm::vec3(1.0f, 1.0f, 1.0f));
+      if (neng < 0.6)
+      {
+        neng += 0.001;
+        _spotLight->angle = neng;
+      }
+      _spotLight->color = {1.0f, 0.0f, 0.0f};
+      _light->intensity = 0.0;
     }
     _blendShader->setMat4("model", _bear0->getModelMatrix());
     _bear0->draw();
-    if (hint == 1) {
-        _bear1->position.x = _camera->position.x;
-        _bear1->position.y = -14.0f;
-        _bear1->position.z = _camera->position.z;
+    if (hint == 1)
+    {
+      _bear1->position.x = _camera->position.x;
+      _bear1->position.y = -14.0f;
+      _bear1->position.z = _camera->position.z;
 
-        _blendShader->setMat4("model", _bear1->getModelMatrix());
-        _bear1->draw();
-        hint = 0;
+      _blendShader->setMat4("model", _bear1->getModelMatrix());
+      _bear1->draw();
+      hint = 0;
     }
 
     if (knock == true)
-      _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
+    {
+      _door->position = glm::vec3(10.2f, -14.4f, 22.6f);
+      _door->computeBoundingBox();
+    }
     else
-      _door->position = glm::vec3(2.0f, 1.0f, 2.0f);
+    {
+      _door->position = glm::vec3(10.2f, -13.4f, 22.6f);
+      _door->computeBoundingBox();
+    }
     _blendShader->setMat4("model", _door->getModelMatrix());
     _door->draw();
     _blendShader->setVec3("light.direction", _light->getFront() * XYD);
@@ -666,9 +665,15 @@ void TextureMapping::renderFrame()
     // _blendShader->setMat4("model", curNPC->getModelMatrix());
     // curNPC->draw();
     if (knock == true)
-      _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
+    {
+      _door->position = glm::vec3(10.2f, -14.4f, 22.6f);
+      _door->computeBoundingBox();
+    }
     else
-      _door->position = glm::vec3(2.0f, 1.0f, 2.0f);
+    {
+      _door->position = glm::vec3(10.2f, -13.4f, 22.6f);
+      _door->computeBoundingBox();
+    }
     _blendShader->setMat4("model", _door->getModelMatrix());
     _door->draw();
     _blendShader->setMat4("model", _newsphere->getModelMatrix());
@@ -738,6 +743,8 @@ void TextureMapping::renderFrame()
   _cube->drawBoundingBox();
   _lineShader->setMat4("model", _maze->getModelMatrix());
   _maze->drawBoundingBox();
+  _lineShader->setMat4("model", _door->getModelMatrix());
+  _door->drawBoundingBox();
   glLineWidth(_lineMaterial->width);
 
   _skybox->draw(projection, view);
@@ -747,7 +754,7 @@ void TextureMapping::renderFrame()
   ImGui::NewFrame();
 
   const auto flags =
-    ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings;
+      ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings;
 
   if (!ImGui::Begin("Control Panel", nullptr, flags))
   {
@@ -758,22 +765,22 @@ void TextureMapping::renderFrame()
     ImGui::SetWindowPos(ImVec2(20, 5), ImGuiCond_Always);
     ImGui::Text("Render Mode");
     ImGui::Separator();
-    ImGui::RadioButton("Game", (int*)&_renderMode,
-      (int)(RenderMode::Game));
+    ImGui::RadioButton("Game", (int *)&_renderMode,
+                       (int)(RenderMode::Game));
     ImGui::NewLine();
 
-    ImGui::RadioButton("Show", (int*)&_renderMode,
-      (int)(RenderMode::Show));
-    ImGui::ColorEdit3("kd1", (float*)&_blendMaterial->kds[0]);
-    ImGui::ColorEdit3("kd2", (float*)&_blendMaterial->kds[1]);
+    ImGui::RadioButton("Show", (int *)&_renderMode,
+                       (int)(RenderMode::Show));
+    ImGui::ColorEdit3("kd1", (float *)&_blendMaterial->kds[0]);
+    ImGui::ColorEdit3("kd2", (float *)&_blendMaterial->kds[1]);
     ImGui::SliderFloat("blend", &_blendMaterial->blend, 0.0f, 1.0f);
     ImGui::NewLine();
 
-    ImGui::RadioButton("Checker Shading", (int*)&_renderMode,
-      (int)(RenderMode::Checker));
+    ImGui::RadioButton("Checker Shading", (int *)&_renderMode,
+                       (int)(RenderMode::Checker));
     ImGui::SliderInt("repeat", &_checkerMaterial->repeat, 2, 20);
-    ImGui::ColorEdit3("color1", (float*)&_checkerMaterial->colors[0]);
-    ImGui::ColorEdit3("color2", (float*)&_checkerMaterial->colors[1]);
+    ImGui::ColorEdit3("color1", (float *)&_checkerMaterial->colors[0]);
+    ImGui::ColorEdit3("color2", (float *)&_checkerMaterial->colors[1]);
     ImGui::Checkbox("wireframe", &wireframe);
     ImGui::Checkbox("boundingbox", &boundingmode);
     ImGui::NewLine();
@@ -783,13 +790,13 @@ void TextureMapping::renderFrame()
     ImGui::SliderFloat("intensity", &_light->intensity, 0.0f, 2.0f);
     ImGui::SliderFloat("xd", &xd, -2.0f, 2.0f);
     ImGui::SliderFloat("yd", &yd, -2.0f, 2.0f);
-    ImGui::ColorEdit3("color", (float*)&_light->color);
+    ImGui::ColorEdit3("color", (float *)&_light->color);
     ImGui::NewLine();
 
     ImGui::Text("Ambient light");
     ImGui::Separator();
     ImGui::SliderFloat("intensity##5", &_ambientLight->intensity, 0.0f, 10.0f);
-    ImGui::ColorEdit3("color##1", (float*)&_ambientLight->color);
+    ImGui::ColorEdit3("color##1", (float *)&_ambientLight->color);
     ImGui::NewLine();
 
     ImGui::Text("spot light");
@@ -847,11 +854,13 @@ void TextureMapping::renderFrame()
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-bool TextureMapping::checkBounding(const glm::vec3& positon)
+bool TextureMapping::checkBounding(const glm::vec3 &positon)
 {
   if (_cube->checkBoundingBox(positon))
     return true;
   if (_roundtable->checkBoundingBox(positon))
+    return true;
+  if (_door->checkBoundingBox(positon))
     return true;
   if (_maze->checkInBoundingBox(positon))
     return true;
