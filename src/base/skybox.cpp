@@ -79,12 +79,9 @@ SkyBox::SkyBox(const std::vector<std::string> &textureFilenames)
         "#version 330 core\n"
         "out vec4 color;\n"
         "in vec3 texCoord;\n"
-        "uniform samplerCube cubemap1;\n"
-        "uniform samplerCube cubemap2;\n"
-        "int skyboxtex;\n"
+        "uniform samplerCube cubemap;\n"
         "void main() {\n"
-        "   if(skyboxtex) color = texture(cubemap2, texCoord);\n"
-        "   else color = texture(cubemap2, texCoord);\n"
+        "   color = texture(cubemap, texCoord);\n"
         "}\n";
 
     _shader.reset(new GLSLProgram);
