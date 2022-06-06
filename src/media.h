@@ -13,6 +13,7 @@ const std::string modelPath8 = "../media/bear.obj";
 
 const std::string earthTexturePath = "../media/earthmap.jpg";
 const std::string planetTexturePath = "../media/planet_Quom1200.png";
+const std::string groundTexturePath = "../media/ground.jpeg";
 const std::vector<std::string> skyboxTexturePaths = {
     "../media/starfield/Right_Tex.jpg",
     "../media/starfield/Left_Tex.jpg",
