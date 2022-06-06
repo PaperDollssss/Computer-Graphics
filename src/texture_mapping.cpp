@@ -169,6 +169,11 @@ TextureMapping::TextureMapping(const Options& options) : Application(options)
 
   // init bounding mode
   boundingmode = true;
+
+  //add music
+#if _WIN32
+  PlayMusic(musicPath);
+#endif
 }
 
 TextureMapping::~TextureMapping()

@@ -2,6 +2,7 @@
 
 #if _WIN32
 #include <windows.h>
+#pragma comment ( lib, "Winmm.lib" )
 #endif
 
 #include <memory>
@@ -18,6 +19,7 @@
 #include "NPC.h"
 #include "genBaseElements.h"
 #include "screenshot.h"
+#include "playmusic.h"
 
 enum class RenderMode
 {

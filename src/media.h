@@ -20,6 +20,8 @@ const std::vector<std::string> skyboxTexturePaths = {
     "../media/starfield/Up_Tex.jpg",
     "../media/starfield/Front_Tex.jpg",
     "../media/starfield/Back_Tex.jpg" };
+
+const std::string musicPath = "../media/night.mp3";
 #endif
 
 #if __APPLE__
@@ -43,4 +45,6 @@ const std::vector<std::string> skyboxTexturePaths = {
     "../../media/starfield/Up_Tex.jpg",
     "../../media/starfield/Front_Tex.jpg",
     "../../media/starfield/Back_Tex.jpg" };
+
+const std::string musicPath = "../../media/night.mp3";
 #endif
