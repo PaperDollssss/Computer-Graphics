@@ -23,6 +23,7 @@ const std::vector<std::string> skyboxTexturePaths = {
     "../media/starfield/Back_Tex.jpg" };
 
 const std::string musicPath = "../media/night.mp3";
+const std::string musicPath2 = "../media/music.mp3";
 #endif
 
 #if __APPLE__

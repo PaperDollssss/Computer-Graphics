@@ -22,7 +22,7 @@ std::vector<GLuint> newsphereIndices;
 bool gameOver = false;
 bool importFlag = 0;
 bool show_another_window = false;
-Model *inputModel;
+Model* inputModel;
 int _amount = 0;
 float xd = -1.0, yd = 1.0;
 bool knock = true;
@@ -113,9 +113,9 @@ TextureMapping::TextureMapping(const Options& options) : Application(options)
   std::shared_ptr<Texture2D> earthTexture =
     std::make_shared<Texture2D>(earthTexturePath);
   std::shared_ptr<Texture2D> planetTexture =
-      std::make_shared<Texture2D>(planetTexturePath);
+    std::make_shared<Texture2D>(planetTexturePath);
   std::shared_ptr<Texture2D> groundTexture =
-      std::make_shared<Texture2D>(groundTexturePath);
+    std::make_shared<Texture2D>(groundTexturePath);
 
   // init materials
   _simpleMaterial.reset(new SimpleMaterial);
@@ -211,7 +211,7 @@ void TextureMapping::handleInput()
         _mouseInput.move.xOld = _mouseInput.move.xCurrent = 0.5 * _windowWidth;
         _mouseInput.move.yOld = _mouseInput.move.yCurrent = 0.5 * _windowHeight;
         glfwSetCursorPos(_window, _mouseInput.move.xCurrent,
-                         _mouseInput.move.yCurrent);
+          _mouseInput.move.yCurrent);
         cursorvisible++;
       }
       else
@@ -220,7 +220,7 @@ void TextureMapping::handleInput()
         _mouseInput.move.xOld = _mouseInput.move.xCurrent = 0.5 * _windowWidth;
         _mouseInput.move.yOld = _mouseInput.move.yCurrent = 0.5 * _windowHeight;
         glfwSetCursorPos(_window, _mouseInput.move.xCurrent,
-                         _mouseInput.move.yCurrent);
+          _mouseInput.move.yCurrent);
         cursorvisible++;
       }
       YES = false;
@@ -327,102 +327,94 @@ void TextureMapping::handleInput()
     if (player == 0)
     {
       cameraPos = cameraMoveSpeed * _camera->getFront();
-      _camera->position += cameraPos;
-      if (checkBounding(_camera->position + 10.0f * cameraPos))
+      if (!checkBounding(_camera->position + 11.0f * cameraPos))
+        _camera->position += cameraPos;
+    }
+    else
+    {
+      cameraPos = cameraMoveSpeed * _camera->getFront();
+      if (!checkBounding(_camera->position + 11.0f * cameraPos))
+      {
+        _camera->position.x += cameraPos.x;
+        _camera->position.z += cameraPos.z;
+      }
+    }
+  }
+  if (_keyboardInput.keyStates[GLFW_KEY_D] != GLFW_RELEASE)
+  {
+    if (player == 0)
+    {
+      cameraPos = _camera->getRight() * cameraMoveSpeed;
+      if (!checkBounding(_camera->position + 11.0f * cameraPos))
+        _camera->position += cameraPos;
+    }
+    else
+    {
+      cameraPos = _camera->getRight() * cameraMoveSpeed;
+      if (!checkBounding(_camera->position + 11.0f * cameraPos))
+      {
+        _camera->position.x += cameraPos.x;
+        _camera->position.z += cameraPos.z;
+      }
+    }
+  }
+  if (_keyboardInput.keyStates[GLFW_KEY_S] != GLFW_RELEASE)
+  {
+    if (player == 0)
+    {
+      cameraPos = cameraMoveSpeed * _camera->getFront();
+      if (!checkBounding(_camera->position - 11.0f * cameraPos))
         _camera->position -= cameraPos;
     }
     else
     {
       cameraPos = cameraMoveSpeed * _camera->getFront();
-      _camera->position.x += cameraPos.x;
-      _camera->position.z += cameraPos.z;
-
-          if (checkBounding(_camera->position + 10.0f * cameraPos)){
-              _camera->position.x -= cameraPos.x;
-              _camera->position.z -= cameraPos.z;
-
-          }
+      if (!checkBounding(_camera->position - 11.0f * cameraPos))
+      {
+        _camera->position.x -= cameraPos.x;
+        _camera->position.z -= cameraPos.z;
       }
-      }
-  if (_keyboardInput.keyStates[GLFW_KEY_D] != GLFW_RELEASE) {
-      if (player == 0)
-    {
-        cameraPos = _camera->getRight() * cameraMoveSpeed;
-        _camera->position += cameraPos;
-        if (checkBounding(_camera->position + 10.0f * cameraPos))
-            _camera->position -= cameraPos;
-  }
-      else {
-        cameraPos = _camera->getRight() * cameraMoveSpeed;
-        _camera->position.x += cameraPos.x;
-        _camera->position.z += cameraPos.z;
-        if (checkBounding(_camera->position + 10.0f * cameraPos)){
-            _camera->position.x -= cameraPos.x;
-            _camera->position.z -= cameraPos.z;
-        }
-      }
-      }
-  if (_keyboardInput.keyStates[GLFW_KEY_S] != GLFW_RELEASE)
-  {
-      if (player == 0) {
-          cameraPos = cameraMoveSpeed * _camera->getFront();
-          _camera->position -= cameraPos;
-          if (checkBounding(_camera->position - 10.0f * cameraPos))
-              _camera->position += cameraPos;
-      }
-      else {
-          cameraPos = cameraMoveSpeed * _camera->getFront();
-          _camera->position.x -= cameraPos.x;
-          _camera->position.z -= cameraPos.z;
-          if (checkBounding(_camera->position - 10.0f * cameraPos)) {
-              _camera->position.x += cameraPos.x;
-              _camera->position.z += cameraPos.z;
-
-          }
-      }
+    }
   }
   if (_keyboardInput.keyStates[GLFW_KEY_A] != GLFW_RELEASE)
   {
-      if (player == 0) {
-          cameraPos = _camera->getRight() * cameraMoveSpeed;
-          _camera->position -= cameraPos;
-          if (checkBounding(_camera->position - 10.0f * cameraPos))
-              _camera->position += cameraPos;
-      }
-      else {
-          cameraPos = _camera->getRight() * cameraMoveSpeed;
-          _camera->position.x -= cameraPos.x;
-          _camera->position.z -= cameraPos.z;
-          if (checkBounding(_camera->position - 10.0f * cameraPos)) {
-              _camera->position.x += cameraPos.x;
-              _camera->position.z += cameraPos.z;
-
-          }
-      }
-  }
-  if (_keyboardInput.keyStates[GLFW_KEY_E] != GLFW_RELEASE) {
-      if (player == 0) 
-          {
-              cameraPos = cameraMoveSpeed * cameraUp;
-              _camera->position -= cameraPos;
-
-              if (checkBounding(_camera->position - 10.0f * cameraPos))
-                  _camera->position += cameraPos;
-          }
-      else {
-          _camera->position.y= -14.5;
-          hint = 0;
-
-      }
-      }
-  if (_keyboardInput.keyStates[GLFW_KEY_Q] != GLFW_RELEASE) {
-      if (player==0) 
-          {
-              cameraPos = cameraMoveSpeed * cameraUp;
-              _camera->position += cameraPos;
-
-      if (checkBounding(_camera->position + 10.0f * cameraPos))
+    if (player == 0)
+    {
+      cameraPos = _camera->getRight() * cameraMoveSpeed;
+      if (!checkBounding(_camera->position - 11.0f * cameraPos))
         _camera->position -= cameraPos;
+    }
+    else
+    {
+      cameraPos = _camera->getRight() * cameraMoveSpeed;
+      if (!checkBounding(_camera->position - 11.0f * cameraPos))
+      {
+        _camera->position.x -= cameraPos.x;
+        _camera->position.z -= cameraPos.z;
+      }
+    }
+  }
+  if (_keyboardInput.keyStates[GLFW_KEY_E] != GLFW_RELEASE)
+  {
+    if (player == 0)
+    {
+      cameraPos = cameraMoveSpeed * cameraUp;
+      if (!checkBounding(_camera->position - 11.0f * cameraPos))
+        _camera->position -= cameraPos;
+    }
+    else
+    {
+      _camera->position.y = 0.0;
+      hint = 0;
+    }
+  }
+  if (_keyboardInput.keyStates[GLFW_KEY_Q] != GLFW_RELEASE)
+  {
+    if (player == 0)
+    {
+      cameraPos = cameraMoveSpeed * cameraUp;
+      if (!checkBounding(_camera->position + 11.0f * cameraPos))
+        _camera->position += cameraPos;
     }
     else
     {
@@ -433,6 +425,9 @@ void TextureMapping::handleInput()
   if (_keyboardInput.keyStates[GLFW_KEY_N] != GLFW_RELEASE)
   {
     _camera->position = glm::vec3(-5.74579, -14.2475, 23.3428);
+#if _WIN32
+    PlayMusic(musicPath2);
+#endif
   }
   if (_keyboardInput.keyStates[GLFW_KEY_M] != GLFW_RELEASE)
   {
