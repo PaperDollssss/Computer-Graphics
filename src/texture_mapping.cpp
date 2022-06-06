@@ -510,6 +510,7 @@ void TextureMapping::handleInput()
 
 void TextureMapping::renderFrame()
 {
+    printf("%f,%f,%f\n", _camera->position.x, _camera->position.y, _camera->position.z);
 
   glm::vec3 XYD{xd, yd, 1.0f};
   static bool wireframe = false;
