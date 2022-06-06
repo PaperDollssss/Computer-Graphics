@@ -404,7 +404,7 @@ void TextureMapping::handleInput()
     }
     else
     {
-      _camera->position.y = 0.0;
+      _camera->position.y = -14.5;
       hint = 0;
     }
   }
