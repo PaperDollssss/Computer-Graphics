@@ -44,11 +44,11 @@ Model::Model(const std::string &filepath)
       vertex.position.z = attrib.vertices[3 * index.v_index + 2];
 
       // there is still a warning with visual studio called vector overflow
-      // if (index.t_index >= 0)
-      //{
-      //   vertex.texCoord.x = attrib.vertices[2 * index.t_index + 0];
-      //   vertex.texCoord.y = attrib.vertices[2 * index.t_index + 1];
-      // }
+       if (index.t_index >= 0)
+      {
+         vertex.texCoord.x = attrib.vertices[2 * index.t_index + 0];
+         vertex.texCoord.y = attrib.vertices[2 * index.t_index + 1];
+       }
 
       if (index.n_index >= 0)
       {

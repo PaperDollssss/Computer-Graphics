@@ -18,7 +18,7 @@
 
 #include "NPC.h"
 #include "genBaseElements.h"
-// #include "screenshot.h"
+#include "screenshot.h"
 #include "playmusic.h"
 
 enum class RenderMode
@@ -36,7 +36,7 @@ struct SimpleMaterial
 struct BlendMaterial
 {
   glm::vec3 kds[2];
-  std::shared_ptr<Texture2D> mapKds[2];
+  std::shared_ptr<Texture2D> mapKds[3];
   float blend;
 };
 

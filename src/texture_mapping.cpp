@@ -66,7 +66,7 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   _bear1->computeBoundingBox();
 
   _door.reset(new Model(modelPath4));
-  _door->scale = glm::vec3(0.08f, 0.08f, 0.08f);
+  _door->scale = glm::vec3(0.14f, 0.08f, 0.10f);
   //_door->computeBoundingBox();
 
   _arml.reset(new Model(modelPath6));
@@ -109,6 +109,7 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
       std::make_shared<Texture2D>(planetTexturePath);
   std::shared_ptr<Texture2D> groundTexture =
       std::make_shared<Texture2D>(groundTexturePath);
+
 
   // init materials
   _simpleMaterial.reset(new SimpleMaterial);
@@ -606,12 +607,12 @@ void TextureMapping::renderFrame()
 
     if (knock == true)
     {
-      _door->position = glm::vec3(10.2f, -14.4f, 22.6f);
+      _door->position = glm::vec3(10.0f, -14.4f, 22.6f);
       _door->computeBoundingBox();
     }
     else
     {
-      _door->position = glm::vec3(10.2f, -13.4f, 22.6f);
+      _door->position = glm::vec3(10.0f, -13.4f, 22.6f);
       _door->computeBoundingBox();
     }
     _blendShader->setMat4("model", _door->getModelMatrix());
@@ -847,7 +848,6 @@ void TextureMapping::renderFrame()
       _light->intensity = 1.0f;
       _spotLight->intensity = 0;
     }
-    ImGui::SameLine();
     ImGui::End();
   }
 
@@ -861,13 +861,6 @@ void TextureMapping::renderFrame()
       winWindow = false;
       gameOver = false;
       _camera->position = glm::vec3(13.269848, -14.500000, 23.273075);
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Exit!"))
-    {
-      winWindow = false;
-      gameOver = false;
-      _camera->position = glm::vec3(-5.74579, -14.2475, 23.3428);
     }
     ImGui::End();
   }
