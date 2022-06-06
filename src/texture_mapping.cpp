@@ -27,6 +27,7 @@ bool knocky = false;
 glm::mat4 view1;
 int player = 0;
 int hint = 1;
+int skyboxtex = 0;
 glm::vec3 camtemp;
 
 TextureMapping::TextureMapping(const Options &options) : Application(options)
@@ -126,7 +127,7 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   _lineMaterial->width = 1.0f;
 
   // init skybox
-  _skybox.reset(new SkyBox(skyboxTexturePaths));
+  _skybox.reset(new SkyBox(skyboxTexturePaths1));
 
   // init camera
   _camera.reset(new PerspectiveCamera(glm::radians(50.0f),
@@ -491,6 +492,7 @@ void TextureMapping::renderFrame()
   switch (_renderMode)
   {
   case RenderMode::Game:
+      skyboxtex = 0;
       player = 1;
     _blendShader->use();
     _blendShader->setMat4("projection", projection);
@@ -556,8 +558,10 @@ void TextureMapping::renderFrame()
     glActiveTexture(GL_TEXTURE1);
     _blendMaterial->mapKds[1]->bind();
     _blendShader->setInt("mapKds[1]", 1);
+
     break;
   case RenderMode::Show:
+      skyboxtex = 1;
       player = 0;
     _blendShader->use();
     _blendShader->setMat4("projection", projection);

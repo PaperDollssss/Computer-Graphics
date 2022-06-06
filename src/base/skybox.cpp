@@ -75,13 +75,16 @@ SkyBox::SkyBox(const std::vector<std::string> &textureFilenames)
         "   gl_Position = (projection * view * vec4(aPosition, 1.0f)).xyww;\n"
         "}\n";
 
-    const char *fsCode =
+    const char* fsCode =
         "#version 330 core\n"
         "out vec4 color;\n"
         "in vec3 texCoord;\n"
-        "uniform samplerCube cubemap;\n"
+        "uniform samplerCube cubemap1;\n"
+        "uniform samplerCube cubemap2;\n"
+        "int skyboxtex;\n"
         "void main() {\n"
-        "   color = texture(cubemap, texCoord);\n"
+        "   if(skyboxtex) color = texture(cubemap2, texCoord);\n"
+        "   else color = texture(cubemap2, texCoord);\n"
         "}\n";
 
     _shader.reset(new GLSLProgram);
