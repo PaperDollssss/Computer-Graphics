@@ -1,8 +1,12 @@
 #pragma once
 
+#if _WIN32
+#include <windows.h>
+#pragma comment ( lib, "Winmm.lib" )
+#endif
+
 #include <memory>
 #include <string>
-#include <windows.h>
 
 #include "base/application.h"
 #include "base/camera.h"
@@ -15,6 +19,7 @@
 #include "NPC.h"
 #include "genBaseElements.h"
 #include "screenshot.h"
+#include "playmusic.h"
 
 enum class RenderMode
 {
@@ -50,7 +55,7 @@ struct LineMaterial
 class TextureMapping : public Application
 {
 public:
-  TextureMapping(const Options &options);
+  TextureMapping(const Options& options);
 
   ~TextureMapping();
 
@@ -73,7 +78,9 @@ private:
   std::unique_ptr<Model> _newsphere;
   std::unique_ptr<Model> _arml;
   std::unique_ptr<Model> _armr;
-  std::unique_ptr<Model> _bear;
+  std::unique_ptr<Model> _bear0;
+  std::unique_ptr<Model> _bear1;
+
 
   // npc NPC;
 
@@ -117,5 +124,5 @@ private:
 
   std::vector<glm::mat4> _modelMatrices;
 
-  bool checkBounding(const glm::vec3 &position);
+  bool checkBounding(const glm::vec3& position);
 };

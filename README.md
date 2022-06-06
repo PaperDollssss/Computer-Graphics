@@ -7,11 +7,6 @@ cmake -Bbuild .
 cd build
 cmake --build . --parallel 8
 ```
-对于Windows，修改.//相对路径问题，并将texture_mapping.h中的windows.h解开注释即可
-
-对于mac，修改../相对路径问题，并将texture_mapping.h中的windows.h注释即可
-
-CmakeList.txt已修改，无需改动。
 
 ## code specification
 
@@ -23,11 +18,29 @@ CmakeList.txt已修改，无需改动。
 
 **最后记得讲注释里的英文全部删除，清理warning！**
 
-**迷宫部分黄导加一下y轴限制吧，因为当下8层递归的情况下还是有可能穿过底座，但7层递归则会导致部分通道被空气墙堵塞，不刻意去按E键下潜的话玩迷宫没啥问题**
-
-关于截图和音乐的Windows.h的问题，现在都被注释掉了，需要的采用如下方法开启
-
+> bug汇总与解决：
 >
+> - 爬墙问题已解决并简化代码
+>
+> - MSVC绘制纹理向量越界问题：仍在debuging，如需操作纹理，推荐使用g++
+>
+> - ../和../../的问题：使用vs调试器和mac gcc都可直接运行。windows下直接打开exe仍需修改（不建议这么做）
+>
+> - windows.h的问题：已解决，现在的情况就是，windows下可以使用截屏和添加音乐两个函数，且已经截屏函数已经添加。mac请直接无视这部分，就当不能截屏和插入音乐。
+>
+>   截屏生成的图片保存在exe同目录（直接运行exe）/工程同目录（使用vs调试器）音乐函数已经实现了重复调用样例（覆盖），按N键实现（同时传送到起点）
+>
+>
+> ```c++
+> #if _WIN32
+> SaveScreenShot(_windowWidth, _windowHeight);
+> #endif
+> 
+> #if _WIN32
+> void PlayMusic(music_path);
+> #endif
+> //请使用上面的方式而非直接调用该函数
+> ```
 
 ### 0.1 总体要求
 **40 total**
@@ -473,6 +486,8 @@ std::shared_ptr<Model> npc::changeModel()
 
 
 
+
+
 ### 碰撞检测
 简单写一下包围盒与八叉树实现碰撞检测的部分原理
 #### 包围盒
@@ -487,7 +502,7 @@ bool Model::checkBoundingBox(const glm::vec3& point) const
 ```c++
 bool Model::checkBoundingBall(const glm::vec3& point) const
 ```
-对于摄像机，每次判断的时候将摄像机加上11倍前进方向的距离作为摄像机的将来位置，模拟摄像机包围盒，如果检测碰撞，则回退摄像机位置（这部分之所以这么写是因为我当时想写模拟碰撞的屏幕震动效果）
+对于摄像机，每次判断的时候将摄像机加上11倍前进方向的距离作为摄像机的将来位置，模拟摄像机包围盒
 ```c++
 //以W键为例
 if (_keyboardInput.keyStates[GLFW_KEY_W] != GLFW_RELEASE)
@@ -529,6 +544,7 @@ template <class T>
 ## 玩法相关
 
 ### 快捷键
+### 按键介绍
 
 n：回到出生点
 m：回到终点

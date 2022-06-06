@@ -23,7 +23,7 @@ file(GLOB PROJECT_HDR ${SOURCE_PATH}/*.h)
 file(GLOB PROJECT_SRC ${SOURCE_PATH}/*.cpp)
 
 if (WIN32)
-	add_executable(final_project ${BASE_HDR} ${BASE_SRC} ${PROJECT_HDR} ${PROJECT_SRC} src/genBaseElements.cpp src/genBaseElements.h src/NPC.cpp src/NPC.h src/screenshot.cpp src/screenshot.h)
+	add_executable(final_project ${BASE_HDR} ${BASE_SRC} ${PROJECT_HDR} ${PROJECT_SRC} src/genBaseElements.cpp src/genBaseElements.h src/NPC.cpp src/NPC.h src/screenshot.cpp src/screenshot.h src/playmusic.cpp src/playmusic.h)
 elseif (UNIX)
 	add_executable(final_project ${BASE_HDR} ${BASE_SRC} ${PROJECT_HDR} ${PROJECT_SRC} src/genBaseElements.cpp src/genBaseElements.h src/NPC.cpp src/NPC.h)
 endif ()

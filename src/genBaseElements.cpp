@@ -1,5 +1,3 @@
-//
-// Created by 胡宇森 on 2022/5/30.
 #define _USE_MATH_DEFINES
 #include "texture_mapping.h"
 glm::vec3 calNorm(glm::vec3 a, glm::vec3 b, glm::vec3 c) {
