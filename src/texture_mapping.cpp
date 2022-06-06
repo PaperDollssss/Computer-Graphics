@@ -28,6 +28,7 @@ glm::mat4 view1;
 int player = 0;
 int hint = 1;
 glm::vec3 camtemp;
+double neng = 0.0;
 
 TextureMapping::TextureMapping(const Options &options) : Application(options)
 {
@@ -55,10 +56,16 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
   _door->computeBoundingBox();
 
-  _bear.reset(new Model(modelPath8));
-  _bear->scale = glm::vec3(0.1f, 0.1f, 0.1f);
-  _bear->position = glm::vec3(-3.0f, -10.0f, 10.0f);
-  _bear->computeBoundingBox();
+  _bear0.reset(new Model(modelPath8));
+  _bear0->scale = glm::vec3(0.1f, 0.1f, 0.1f);
+  _bear0->position = glm::vec3(-4.0f, -14.1f, 11.0f);
+  _bear0->computeBoundingBox();
+
+  _bear1.reset(new Model(modelPath8));
+  _bear1->scale = glm::vec3(0.1f, 0.1f, 0.1f);
+  _bear1->position = glm::vec3(-4.0f, -14.1f, 11.0f);
+  _bear1->computeBoundingBox();
+
 
   _door.reset(new Model(modelPath4));
   _door->scale = glm::vec3(0.05f, 0.05f, 0.05f);
@@ -289,8 +296,11 @@ void TextureMapping::handleInput()
           _camera->position.x += cameraPos.x;
           _camera->position.z += cameraPos.z;
 
-          if (checkBounding(_camera->position + 10.0f * cameraPos))
-              _camera->position -= cameraPos;
+          if (checkBounding(_camera->position + 10.0f * cameraPos)){
+              _camera->position.x -= cameraPos.x;
+              _camera->position.z -= cameraPos.z;
+
+          }
       }
       }
   if (_keyboardInput.keyStates[GLFW_KEY_D] != GLFW_RELEASE) {
@@ -305,8 +315,10 @@ void TextureMapping::handleInput()
         cameraPos = _camera->getRight() * cameraMoveSpeed;
         _camera->position.x += cameraPos.x;
         _camera->position.z += cameraPos.z;
-        if (checkBounding(_camera->position + 10.0f * cameraPos))
-            _camera->position -= cameraPos;
+        if (checkBounding(_camera->position + 10.0f * cameraPos)){
+            _camera->position.x -= cameraPos.x;
+            _camera->position.z -= cameraPos.z;
+        }
       }
       }
   if (_keyboardInput.keyStates[GLFW_KEY_S] != GLFW_RELEASE)
@@ -321,8 +333,11 @@ void TextureMapping::handleInput()
           cameraPos = cameraMoveSpeed * _camera->getFront();
           _camera->position.x -= cameraPos.x;
           _camera->position.z -= cameraPos.z;
-          if (checkBounding(_camera->position - 10.0f * cameraPos))
-              _camera->position += cameraPos;
+          if (checkBounding(_camera->position - 10.0f * cameraPos)) {
+              _camera->position.x += cameraPos.x;
+              _camera->position.z += cameraPos.z;
+
+          }
       }
   }
   if (_keyboardInput.keyStates[GLFW_KEY_A] != GLFW_RELEASE)
@@ -337,8 +352,11 @@ void TextureMapping::handleInput()
           cameraPos = _camera->getRight() * cameraMoveSpeed;
           _camera->position.x -= cameraPos.x;
           _camera->position.z -= cameraPos.z;
-          if (checkBounding(_camera->position - 10.0f * cameraPos))
-              _camera->position += cameraPos;
+          if (checkBounding(_camera->position - 10.0f * cameraPos)) {
+              _camera->position.x += cameraPos.x;
+              _camera->position.z += cameraPos.z;
+
+          }
       }
   }
   if (_keyboardInput.keyStates[GLFW_KEY_E] != GLFW_RELEASE) {
@@ -351,7 +369,7 @@ void TextureMapping::handleInput()
                   _camera->position += cameraPos;
           }
       else {
-          _camera->position.y= 0.0;
+          _camera->position.y= -14.5;
           hint = 0;
 
       }
@@ -503,27 +521,40 @@ void TextureMapping::renderFrame()
     _arml->position = _camera->position;
     _blendShader->setMat4("model", _arml->getModelMatrix());
     _arml->draw();
-    if (((_bear->position.x - _camera->position.x) * (_bear->position.x - _camera->position.x) + (_bear->position.z - _camera->position.z) * (_bear->position.z - _camera->position.z)) < 9.0)
-      if ((_bear->position.y - _camera->position.y) < 1.0 && (_bear->position.y - _camera->position.y) > -1.0)
-      {
-        if (_bear->position.x > _camera->position.x)
-          _bear->position.x -= 0.01 * (3.0 - (_bear->position.x - _camera->position.x));
-        if (_bear->position.x < _camera->position.x)
-          _bear->position.x += 0.01 * (3.0 - (_bear->position.x - _camera->position.x));
-        if (_bear->position.z > _camera->position.z)
-          _bear->position.z -= 0.01 * (3.0 - (_bear->position.z - _camera->position.z));
-        if (_bear->position.z < _camera->position.z)
-          _bear->position.z += 0.01 * (3.0 - (_bear->position.z - _camera->position.z));
-      }
-    _blendShader->setMat4("model", _bear->getModelMatrix());
-    _bear->draw();
-    if (hint == 1) {
-        _bear->position.x = _camera->position.x;
-        _bear->position.y = -14.0f;
-        _bear->position.z = _camera->position.z;
 
-        _blendShader->setMat4("model", _bear->getModelMatrix());
-        _bear->draw();
+    if ((((_bear0->position.x - _camera->position.x) * (_bear0->position.x - _camera->position.x) + (_bear0->position.z - _camera->position.z) * (_bear0->position.z - _camera->position.z)) < 9.0)
+        && (((_bear0->position.x - _camera->position.x) * (_bear0->position.x - _camera->position.x) + (_bear0->position.z - _camera->position.z) * (_bear0->position.z - _camera->position.z)) >= 1.0))
+        if ((_bear0->position.y - _camera->position.y) < 1.0 && (_bear0->position.y - _camera->position.y) > -1.0)
+        {
+            if (_bear0->position.x > _camera->position.x)
+                _bear0->position.x -= 0.01 * (3.0 - (_bear0->position.x - _camera->position.x));
+            if (_bear0->position.x < _camera->position.x)
+                _bear0->position.x += 0.01 * (3.0 - (_bear0->position.x - _camera->position.x));
+            if (_bear0->position.z > _camera->position.z)
+                _bear0->position.z -= 0.01 * (3.0 - (_bear0->position.z - _camera->position.z));
+            if (_bear0->position.z < _camera->position.z)
+                _bear0->position.z += 0.01 * (3.0 - (_bear0->position.z - _camera->position.z));
+        }
+    if (((_bear0->position.x - _camera->position.x) * (_bear0->position.x - _camera->position.x) + (_bear0->position.z - _camera->position.z) * (_bear0->position.z - _camera->position.z)) <= 1.0) {
+        _spotLight->position = _camera->position + glm::vec3(0.0f, 0.0f, 0.0f);
+        _spotLight->rotation = glm::angleAxis(glm::radians(0.0f), -glm::vec3(1.0f, 1.0f, 1.0f));
+        if (neng < 0.6) {
+            neng += 0.001;
+            _spotLight->angle = neng;
+        }
+        _spotLight->color = { 1.0f, 0.0f, 0.0f };
+        _light->intensity = 0.0;
+
+    }
+    _blendShader->setMat4("model", _bear0->getModelMatrix());
+    _bear0->draw();
+    if (hint == 1) {
+        _bear1->position.x = _camera->position.x;
+        _bear1->position.y = -14.0f;
+        _bear1->position.z = _camera->position.z;
+
+        _blendShader->setMat4("model", _bear1->getModelMatrix());
+        _bear1->draw();
         hint = 0;
     }
 
@@ -559,6 +590,7 @@ void TextureMapping::renderFrame()
     break;
   case RenderMode::Show:
       player = 0;
+      printf("%f", _camera->position.y);
     _blendShader->use();
     _blendShader->setMat4("projection", projection);
     _blendShader->setMat4("view", view);
@@ -591,6 +623,7 @@ void TextureMapping::renderFrame()
     _door->draw();
     _blendShader->setMat4("model", _newsphere->getModelMatrix());
     _newsphere->draw();
+
     _blendShader->setVec3("light.direction", _light->getFront() * XYD);
     _blendShader->setVec3("light.color", _light->color);
     _blendShader->setFloat("light.intensity", _light->intensity);
@@ -709,7 +742,7 @@ void TextureMapping::renderFrame()
 
     ImGui::Text("spot light");
     ImGui::Separator();
-    ImGui::SliderFloat("intensity##3", &_spotLight->intensity, 0.0f, 1.5f);
+    ImGui::SliderFloat("intensity##3", &_spotLight->intensity, 0.0f, 15.0f);
     ImGui::ColorEdit3("color##3", (float *)&_spotLight->color);
     ImGui::SliderFloat("angle##3", (float *)&_spotLight->angle, 0.0f, glm::radians(180.0f), "%f rad");
     ImGui::NewLine();
