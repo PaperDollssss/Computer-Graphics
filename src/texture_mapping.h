@@ -1,8 +1,11 @@
 #pragma once
 
+#if _WIN32
+#include <windows.h>
+#endif
+
 #include <memory>
 #include <string>
-#include <windows.h>
 
 #include "base/application.h"
 #include "base/camera.h"
@@ -50,7 +53,7 @@ struct LineMaterial
 class TextureMapping : public Application
 {
 public:
-  TextureMapping(const Options &options);
+  TextureMapping(const Options& options);
 
   ~TextureMapping();
 
@@ -117,5 +120,5 @@ private:
 
   std::vector<glm::mat4> _modelMatrices;
 
-  bool checkBounding(const glm::vec3 &position);
+  bool checkBounding(const glm::vec3& position);
 };
