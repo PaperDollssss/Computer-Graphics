@@ -7,11 +7,26 @@ cmake -Bbuild .
 cd build
 cmake --build . --parallel 8
 ```
-对于Windows，修改.//相对路径问题，并将texture_mapping.h中的windows.h解开注释即可
-
-对于mac，修改../相对路径问题，并将texture_mapping.h中的windows.h注释即可
-
-CmakeList.txt已修改，无需改动。
+> bug汇总与解决：
+>
+> MSVC绘制纹理向量越界问题：仍在debuging，如需操作纹理，推荐使用g++
+>
+> ../和../../的问题：使用vs调试器和mac gcc都可直接运行。windows下直接打开exe仍需修改（不建议这么做）
+>
+> windows.h的问题：已解决，现在的情况就是，windows下可以使用截屏和添加音乐两个函数，且已经截屏函数已经添加。mac请直接无视这部分，就当不能截屏和插入音乐。
+>
+> 截屏生成的图片保存在exe同目录（直接运行exe）/工程同目录（使用vs调试器）
+>
+> ```c++
+> #if _WIN32
+> SaveScreenShot(_windowWidth, _windowHeight);
+> #endif
+> 
+> #if _WIN32
+> void PlayMusic(music_path);
+> #endif
+> //请使用上面的方式而非直接调用该函数
+> ```
 
 ## code specification
 
