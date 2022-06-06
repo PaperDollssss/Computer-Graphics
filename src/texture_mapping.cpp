@@ -92,13 +92,13 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   _cylinder->computeBoundingBox();
 
   _roundtable.reset(new Model(roundtableVertices, roundtableIndices));
-  _roundtable->scale = glm::vec3(2.0f, 2.0f, 2.0f);
-  _roundtable->position = glm::vec3(20.0f, 5.0f, 0.0f);
+  _roundtable->scale = glm::vec3(1.0f, 1.0f, 1.0f);
+  _roundtable->position = glm::vec3(-10.0f, 18.5f, 0.0f);
   _roundtable->computeBoundingBox();
 
   _newsphere.reset(new Model(newsphereVertices, newsphereIndices));
-  _newsphere->scale = glm::vec3(2.0f, 2.0f, 2.0f);
-  _newsphere->position = glm::vec3(40.0f, 5.0f, 0.0f);
+  _newsphere->scale = glm::vec3(1.0f, 1.0f, 1.0f);
+  _newsphere->position = glm::vec3(-10.0f, 13.0f, 0.0f);
   _newsphere->computeBoundingBox();
 
   // init textures

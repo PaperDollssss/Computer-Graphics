@@ -304,7 +304,7 @@ bool Model::checkBoundingBox(const glm::vec3 &point) const
 bool Model::checkBoundingBall(const glm::vec3 &point) const
 {
   // sphereRadius = 5 * 2
-  if (sqrt(pow((point.x - position.x), 2) + pow((point.y - position.y), 2) + pow((point.z - position.z), 2)) > 10)
+  if (sqrt(pow((point.x - position.x), 2) + pow((point.y - position.y), 2) + pow((point.z - position.z), 2)) > 5)
     return false;
   else
     return true;
