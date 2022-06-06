@@ -21,7 +21,8 @@ std::vector<GLuint> newsphereIndices;
 
 bool gameOver = false;
 bool importFlag = 0;
-bool show_another_window = false;
+bool loseWindow = false;
+bool winWindow = false;
 Model *inputModel;
 int _amount = 0;
 float xd = -1.0, yd = 1.0;
@@ -92,13 +93,13 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   _cylinder->computeBoundingBox();
 
   _roundtable.reset(new Model(roundtableVertices, roundtableIndices));
-  _roundtable->scale = glm::vec3(2.0f, 2.0f, 2.0f);
-  _roundtable->position = glm::vec3(20.0f, 5.0f, 0.0f);
+  _roundtable->scale = glm::vec3(1.0f, 1.0f, 1.0f);
+  _roundtable->position = glm::vec3(-10.0f, 18.5f, 0.0f);
   _roundtable->computeBoundingBox();
 
   _newsphere.reset(new Model(newsphereVertices, newsphereIndices));
-  _newsphere->scale = glm::vec3(2.0f, 2.0f, 2.0f);
-  _newsphere->position = glm::vec3(40.0f, 5.0f, 0.0f);
+  _newsphere->scale = glm::vec3(1.0f, 1.0f, 1.0f);
+  _newsphere->position = glm::vec3(-10.0f, 13.0f, 0.0f);
   _newsphere->computeBoundingBox();
 
   // init textures
@@ -416,15 +417,15 @@ void TextureMapping::handleInput()
   }
   if (_keyboardInput.keyStates[GLFW_KEY_N] != GLFW_RELEASE)
   {
-    _camera->position = glm::vec3(-5.74579, -14.2475, 23.3428);
+    _camera->position = glm::vec3(13.269848, -14.500000, 23.273075);
 #if _WIN32
     PlayMusic(musicPath2);
 #endif
   }
   if (_keyboardInput.keyStates[GLFW_KEY_M] != GLFW_RELEASE)
   {
-    _camera->position = glm::vec3(-4.26479, -14.3559, -22.9246);
-    show_another_window = true;
+    _camera->position = glm::vec3(13.438785, -14.500000, -23.279537);
+    winWindow = true;
     gameOver = true;
   }
 
@@ -584,6 +585,8 @@ void TextureMapping::renderFrame()
       {
         neng += 0.001;
         _spotLight->angle = neng;
+        loseWindow = true;
+        gameOver = true;
       }
       _spotLight->color = {1.0f, 0.0f, 0.0f};
       _light->intensity = 0.0;
@@ -830,21 +833,39 @@ void TextureMapping::renderFrame()
     ImGui::End();
   }
 
-  if (show_another_window)
+  if (loseWindow)
   {
-    ImGui::Begin("GameOver", &show_another_window); // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+    ImGui::Begin("GameOver", &loseWindow); // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
     ImGui::SetWindowPos(ImVec2(540, 320), ImGuiCond_Always);
     ImGui::Text("GameOver! You Lose!");
     if (ImGui::Button("Restart!"))
     {
-      show_another_window = false;
+      loseWindow = false;
       gameOver = false;
-      _camera->position = glm::vec3(-5.74579, -14.2475, 23.3428);
+      _camera->position = glm::vec3(13.269848, -14.500000, 23.273075);
+      _spotLight->color = {1.0f, 0.0f, 0.0f};
+      _light->intensity = 1.0f;
+      _spotLight->intensity = 0;
+    }
+    ImGui::SameLine();
+    ImGui::End();
+  }
+
+  if (winWindow)
+  {
+    ImGui::Begin("GameOver", &winWindow); // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+    ImGui::SetWindowPos(ImVec2(540, 320), ImGuiCond_Always);
+    ImGui::Text("GameOver! You Win!");
+    if (ImGui::Button("Restart!"))
+    {
+      winWindow = false;
+      gameOver = false;
+      _camera->position = glm::vec3(13.269848, -14.500000, 23.273075);
     }
     ImGui::SameLine();
     if (ImGui::Button("Exit!"))
     {
-      show_another_window = false;
+      winWindow = false;
       gameOver = false;
       _camera->position = glm::vec3(-5.74579, -14.2475, 23.3428);
     }
