@@ -1,7 +1,3 @@
-//
-// Created by 胡宇森 on 2022/6/1.
-//
-
 #include "NPC.h"
 #include <iostream>
 npc::npc()

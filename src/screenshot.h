@@ -1,6 +1,3 @@
-//
-// Created by weichen on 2022/6/1
-//
 #ifndef FINAL_PROJECT_SRC_SCREENSHOT_H_
 #define FINAL_PROJECT_SRC_SCREENSHOT_H_
 
