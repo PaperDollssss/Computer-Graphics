@@ -2,7 +2,7 @@
 
 #if _WIN32
 #include <windows.h>
-#pragma comment ( lib, "Winmm.lib" )
+#pragma comment(lib, "Winmm.lib")
 #endif
 
 #include <memory>
@@ -36,7 +36,7 @@ struct SimpleMaterial
 struct BlendMaterial
 {
   glm::vec3 kds[2];
-  std::shared_ptr<Texture2D> mapKds[2];
+  std::shared_ptr<Texture2D> mapKds[3];
   float blend;
 };
 
@@ -55,7 +55,7 @@ struct LineMaterial
 class TextureMapping : public Application
 {
 public:
-  TextureMapping(const Options& options);
+  TextureMapping(const Options &options);
 
   ~TextureMapping();
 
@@ -80,7 +80,6 @@ private:
   std::unique_ptr<Model> _armr;
   std::unique_ptr<Model> _bear0;
   std::unique_ptr<Model> _bear1;
-
 
   // npc NPC;
 
@@ -124,5 +123,5 @@ private:
 
   std::vector<glm::mat4> _modelMatrices;
 
-  bool checkBounding(const glm::vec3& position);
+  bool checkBounding(const glm::vec3 &position);
 };
