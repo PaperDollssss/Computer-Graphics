@@ -543,7 +543,7 @@ void TextureMapping::renderFrame()
   else
     y = 2 - ((int)t % 2 + t - (int)t);
 
-  // std::shared_ptr<Model> curNPC = NPC.changeModel();
+  std::shared_ptr<Model> curNPC = NPC.changeModel();
 
   // draw planet
   switch (_renderMode)
@@ -567,7 +567,7 @@ void TextureMapping::renderFrame()
     _blendShader->setMat4("model", _arml->getModelMatrix());
     _arml->draw();
 
-    if ((((_bear0->position.x - _camera->position.x) * (_bear0->position.x - _camera->position.x) + (_bear0->position.z - _camera->position.z) * (_bear0->position.z - _camera->position.z)) < 9.0) && (((_bear0->position.x - _camera->position.x) * (_bear0->position.x - _camera->position.x) + (_bear0->position.z - _camera->position.z) * (_bear0->position.z - _camera->position.z)) >= 1.0))
+    if ((((_bear0->position.x - _camera->position.x) * (_bear0->position.x - _camera->position.x) + (_bear0->position.z - _camera->position.z) * (_bear0->position.z - _camera->position.z)) < 16.0) && (((_bear0->position.x - _camera->position.x) * (_bear0->position.x - _camera->position.x) + (_bear0->position.z - _camera->position.z) * (_bear0->position.z - _camera->position.z)) >= 1.0))
       if ((_bear0->position.y - _camera->position.y) < 1.0 && (_bear0->position.y - _camera->position.y) > -1.0)
       {
         if (_bear0->position.x > _camera->position.x)
@@ -585,7 +585,7 @@ void TextureMapping::renderFrame()
       _spotLight->rotation = glm::angleAxis(glm::radians(0.0f), -glm::vec3(1.0f, 1.0f, 1.0f));
       if (neng < 0.6)
       {
-        neng += 0.001;
+        neng += 0.002;
         _spotLight->angle = neng;
         loseWindow = true;
         gameOver = true;
@@ -682,8 +682,8 @@ void TextureMapping::renderFrame()
 
     _blendShader->setMat4("model", _maze->getModelMatrix());
     _maze->draw();
-    // _blendShader->setMat4("model", curNPC->getModelMatrix());
-    // curNPC->draw();
+    _blendShader->setMat4("model", curNPC->getModelMatrix());
+    curNPC->draw();
     if (knock == true)
     {
       _door->position = glm::vec3(10.2f, -14.4f, 22.6f);

@@ -81,7 +81,7 @@ private:
   std::unique_ptr<Model> _bear0;
   std::unique_ptr<Model> _bear1;
 
-  // npc NPC;
+  npc NPC;
 
   std::unique_ptr<SimpleMaterial> _simpleMaterial;
   std::unique_ptr<BlendMaterial> _blendMaterial;
