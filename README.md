@@ -1,5 +1,7 @@
 # Computer-Graphics Final Project
 
+# 《玩具能的午夜后宫》
+
 ## Way to Compile
 
 ```bash
@@ -8,27 +10,19 @@ cd build
 cmake --build . --parallel 8
 ```
 
-## code specification
+## 0 To Do
 
-采用visual studio c++代码规则
+### 0.0 bug汇总与解决记录
 
-缩进：2空格
-
-## To Do
-
-**最后记得讲注释里的英文全部删除，清理warning！**
-
-> bug汇总与解决：
+> - - [x] 爬墙问题已解决并简化碰撞检测代码
 >
-> - 爬墙问题已解决并简化代码
+> - - [ ] MSVC+windows11sdk环境下，绘制纹理向量越界问题：仍在debuging
 >
-> - MSVC绘制纹理向量越界问题：仍在debuging，如需操作纹理，推荐使用g++
+> - - [x] ../和../../的问题：使用vs调试器和mac gcc都可直接运行。windows下直接打开exe仍需修改（不建议这么做）
 >
-> - ../和../../的问题：使用vs调试器和mac gcc都可直接运行。windows下直接打开exe仍需修改（不建议这么做）
+> - - [x] windows.h的问题：已解决，现在的情况就是，windows下可以使用截屏和添加音乐两个函数，且已经截屏函数已经添加。mac请直接无视这部分，就当不能截屏和插入音乐。
 >
-> - windows.h的问题：已解决，现在的情况就是，windows下可以使用截屏和添加音乐两个函数，且已经截屏函数已经添加。mac请直接无视这部分，就当不能截屏和插入音乐。
->
->   截屏生成的图片保存在exe同目录（直接运行exe）/工程同目录（使用vs调试器）音乐函数已经实现了重复调用样例（覆盖），按N键实现（同时传送到起点）
+>     截屏生成的图片保存在exe同目录（直接运行exe）/工程同目录（使用vs调试器）音乐函数已经实现了重复调用样例（覆盖），按N键实现（同时传送到起点）
 >
 >
 > ```c++
@@ -41,6 +35,8 @@ cmake --build . --parallel 8
 > #endif
 > //请使用上面的方式而非直接调用该函数
 > ```
+>
+> - - [ ] 最后记得讲注释里的英文全部删除，清理warning！
 
 ### 0.1 总体要求
 **40 total**
@@ -75,15 +71,13 @@ cmake --build . --parallel 8
 - [x] 添加音乐
 - [ ] 其他……
 
-
-
-## Introduction
-### 1.1
+## 1 Introduction
+### 1.1 All Introduction
 ### 1.2 Module introduction
 
-## Module implementation
+## 2 Module implementation
 
-### 基本体素建模表达
+### 2.1 基本体素建模表达
 
 立方体建模：直接利用每个点的坐标进行绘制。
 
@@ -128,8 +122,6 @@ void genCube(std::vector<Vertex> &cubeVertices,
   // ...
 }
 ```
-
-
 
 相对复杂基本体：以圆锥为例，利用多个三角形网格绘制基本体素，当三角形数量够多就能逼近基本体素的形态。
 
@@ -188,7 +180,7 @@ void genCone(std::vector<Vertex> &coneVertices,
 }
 ```
 
-### OBJ格式文件的读入与导出
+### 2.2 OBJ格式文件的读入与导出
 
 OBJ文件读入：由于不要求解析mtl文件，因此只需要关注文件信息中的顶点数据，顶点索引以及网格信息。
 
@@ -402,7 +394,262 @@ namespace obj
 }
 ```
 
-### 连续帧绘制
+### 2.3 基本材质、纹理的显示和编辑能力
+
+实现了基本材质、纹理的显示和编辑能力
+
+仅节选部分代码
+
+BlendShader
+
+```c++
+void TextureMapping::initBlendShader() {
+  const char *vsCode =
+      "#version 330 core\n"
+      "layout(location = 0) in vec3 aPosition;\n"
+      "layout(location = 1) in vec3 aNormal;\n"
+      "layout(location = 2) in vec2 aTexCoord;\n"
+      "out vec3 fPosition;\n"
+      "out vec3 fNormal;\n"
+      "out vec2 fTexCoord;\n"
+      "uniform mat4 projection;\n"
+      "uniform mat4 view;\n"
+      "uniform mat4 model;\n"
+
+      "void main() {\n"
+      "	fPosition = vec3(model * vec4(aPosition, 1.0f));\n"
+      "	fNormal = mat3(transpose(inverse(model))) * aNormal;\n"
+      "	fTexCoord = aTexCoord;\n"
+      "	gl_Position = projection * view * model * vec4(aPosition, 1.0f);\n"
+
+      "}\n";
+
+  const char *fsCode =
+      "#version 330 core\n"
+      "in vec3 fPosition;\n"
+      "in vec3 fNormal;\n"
+      "in vec2 fTexCoord;\n"
+      "out vec4 color;\n"
+      "struct DirectionalLight {\n"
+      "	vec3 direction;\n"
+      "	vec3 color;\n"
+      "	float intensity;\n"
+      "};\n"
+
+      "// spot light data structure declaration\n"
+      "struct SpotLight {\n"
+      "	vec3 position;\n"
+      "	vec3 direction;\n"
+      "	float intensity;\n"
+      "	vec3 color;\n"
+      "	float angle;\n"
+      "	float kc;\n"
+      "	float kl;\n"
+      "	float kq;\n"
+      "};\n"
+
+      "struct AmbientLight {\n"
+      "	vec3 color;\n"
+      "	float intensity;\n"
+      "};\n"
+
+      "struct Material {\n"
+      "	vec3 kds[2];\n"
+      "	float blend;\n"
+      "};\n"
+
+      "uniform Material material;\n"
+      "uniform DirectionalLight light;\n"
+      "uniform sampler2D mapKds[2];\n"
+      "uniform AmbientLight ambientLight;\n"
+      "uniform SpotLight spotLight;\n"
+
+      "vec3 calcSpotLight(vec3 normal) {\n"
+      "	vec3 lightDir = normalize(spotLight.position - fPosition);\n"
+      "	float theta = acos(-dot(lightDir, normalize(spotLight.direction)));\n"
+      "	if (theta > spotLight.angle) {\n"
+      "		return vec3(0.0f, 0.0f, 0.0f);\n"
+      "	}\n"
+      "	vec3 diffuse = spotLight.color * max(dot(lightDir, normal), 0.0f) * (material.kds[0]+material.kds[1]);\n"
+      "	float distance = length(spotLight.position - fPosition);\n"
+      "	float attenuation = 1.0f / (spotLight.kc + spotLight.kl * distance + spotLight.kq * distance * distance);\n"
+      "	return spotLight.intensity * attenuation * diffuse;\n"
+      "}\n"
+
+      "vec3 calcDirectionalLight(vec3 normal) {\n"
+      "	vec3 lightDir = normalize(-light.direction);\n"
+      "	vec3 diffuse = light.color * max(dot(lightDir, normal), 0.0f) * "
+      "(material.kds[0]+material.kds[1]);\n"
+      "	return light.intensity * diffuse ;\n"
+      "}\n"
+
+      "void main() {\n"
+      "	vec3 normal = normalize(fNormal);\n"
+      "	vec3 ambient = vec3(0.03f, 0.03f, 0.03f) * ambientLight.color * ambientLight.intensity;\n"
+      "	vec3 spot = calcSpotLight(normal);\n"
+      "	vec3 diffuse = calcDirectionalLight(normal);\n"
+      //"	vec3 ambient = 0.08*light.color * light.intensity * "
+      "(material.kds[0]+material.kds[1]);\n"
+      "	color = mix(texture(mapKds[0], fTexCoord), texture(mapKds[1], "
+      "fTexCoord), material.blend) * vec4(diffuse+ambient+spot, 1.0f);\n"
+      "}\n";
+
+  //----------------------------------------------------------------
+
+  _blendShader.reset(new GLSLProgram);
+  _blendShader->attachVertexShader(vsCode);
+  _blendShader->attachFragmentShader(fsCode);
+  _blendShader->link();
+}
+```
+
+ui界面编辑材质和纹理
+
+```c++
+    ImGui::RadioButton("Show", (int*)&_renderMode,
+      (int)(RenderMode::Show));
+    ImGui::ColorEdit3("kd1", (float*)&_blendMaterial->kds[0]);
+    ImGui::ColorEdit3("kd2", (float*)&_blendMaterial->kds[1]);
+    ImGui::SliderFloat("blend", &_blendMaterial->blend, 0.0f, 1.0f);
+    ImGui::NewLine();
+```
+
+### 2.4 基本几何变换功能
+
+实现了模型的旋转平移缩放功能
+
+按键R
+
+```c++
+  if (_keyboardInput.keyStates[GLFW_KEY_R] != GLFW_RELEASE)
+  {
+    _sphere->position += glm::vec3(0.0f, 0.03f, 0.0f);
+  }
+```
+
+按键-
+
+```c++
+  if (_keyboardInput.keyStates[GLFW_KEY_MINUS] != GLFW_RELEASE)
+  {
+    _sphere->scale -= glm::vec3(0.03f, 0.03f, 0.03f);
+    if (_sphere->scale.x < 0.03 || _sphere->scale.y < 0.03 ||
+      _sphere->scale.z < 0.03)
+      _sphere->scale = glm::vec3(0.03f, 0.03f, 0.03f);
+  }
+```
+
+
+### 2.5 光照模型、基本光源编辑
+
+directional light，ambient light，spot light
+实现了光强、颜色、角度等编辑功能
+
+仅节选部分代码
+
+光源初始化
+
+```c++
+  // init light
+  _light.reset(new DirectionalLight());
+  _light->rotation =
+    glm::angleAxis(glm::radians(45.0f), -glm::vec3(1.0f, 1.0f, 1.0f));
+
+  _spotLight.reset(new SpotLight());
+  _spotLight->position = glm::vec3(0.0f, 0.0f, 5.0f);
+  _spotLight->rotation = glm::angleAxis(glm::radians(45.0f), -glm::vec3(1.0f, 1.0f, 1.0f));
+
+  _ambientLight.reset(new AmbientLight);
+```
+
+ui界面编辑光源
+
+```c++
+    ImGui::Text("Directional Light");
+    ImGui::Separator();
+    ImGui::SliderFloat("intensity", &_light->intensity, 0.0f, 2.0f);
+    ImGui::SliderFloat("xd", &xd, -2.0f, 2.0f);
+    ImGui::SliderFloat("yd", &yd, -2.0f, 2.0f);
+    ImGui::ColorEdit3("color", (float*)&_light->color);
+    ImGui::NewLine();
+```
+
+
+### 2.6 摄像机漫游
+
+实现了game模式的2.5维摄像机，show模式的三维摄像机，并实现了Zoom In/Out,Orbit,Zoom To Fit等功能
+
+仅节选部分代码
+
+按键A
+
+```c++
+  if (_keyboardInput.keyStates[GLFW_KEY_A] != GLFW_RELEASE)
+  {
+    if (player == 0)
+    {
+      cameraPos = _camera->getRight() * cameraMoveSpeed;
+      if (!checkBounding(_camera->position - 11.0f * cameraPos))
+        _camera->position -= cameraPos;
+    }
+    else
+    {
+      cameraPos = _camera->getRight() * cameraMoveSpeed;
+      if (!checkBounding(_camera->position - 11.0f * cameraPos))
+      {
+        _camera->position.x -= cameraPos.x;
+        _camera->position.z -= cameraPos.z;
+      }
+    }
+  }
+```
+
+鼠标移动
+
+```c++
+  if (cursorvisible % 2 == 0)
+  {
+    if (_mouseInput.move.xCurrent != _mouseInput.move.xOld)
+    {
+      double mouse_movement_in_x_direction =
+        -(_mouseInput.move.xCurrent - _mouseInput.move.xOld);
+      glm::vec3 right = glm::vec3(0.0f, 1.0f, 0.0f);
+      double thetax = 0.003 * mouse_movement_in_x_direction;
+      camera->rotation =
+        glm::quat{ (float)cos(thetax / 2), (float)sin(thetax / 2) * right } *
+        camera->rotation;
+      _mouseInput.move.xOld = _mouseInput.move.xCurrent;
+    }
+    if (_mouseInput.move.yCurrent != _mouseInput.move.yOld)
+    {
+      double mouse_movement_in_y_direction =
+        -(_mouseInput.move.yCurrent - _mouseInput.move.yOld);
+      glm::vec3 up = camera->getRight();
+      double thetay = 0.003 * mouse_movement_in_y_direction;
+      camera->rotation =
+        glm::quat{ (float)cos(thetay / 2), (float)sin(thetay / 2) * up } *
+        camera->rotation;
+      _mouseInput.move.yOld = _mouseInput.move.yCurrent;
+    }
+  }
+```
+
+鼠标滚轮
+
+```c++
+  if (_mouseInput.scroll.y != 0)
+  {
+    if (_camera->fovy >= 0.05f && _camera->fovy <= 2.8f)
+      _camera->fovy -= 0.02 * _mouseInput.scroll.y;
+    if (_camera->fovy <= 0.05f)
+      _camera->fovy = 0.05f;
+    if (_camera->fovy >= 2.8f)
+      _camera->fovy = 2.8f;
+    _mouseInput.scroll.y = 0;
+  }
+```
+
+### 2.7 连续帧绘制
 
 目的：将多个具有连续动作的obj文件连续绘制，实现动画效果。
 
@@ -484,13 +731,10 @@ std::shared_ptr<Model> npc::changeModel()
 }
 ```
 
+### 2.8 空间碰撞检测
 
-
-
-
-### 碰撞检测
 简单写一下包围盒与八叉树实现碰撞检测的部分原理
-#### 包围盒
+#### 2.8.1 包围盒
 基本AABB矩形包围盒部分，在助教给出的model.boundingbox属性上进行添改，增加了包围盒顶点坐标变换（与模型一起进行空间坐标变换）
 ```c++
 //在加载模型时使用计算函数进行包围盒计算
@@ -507,14 +751,25 @@ bool Model::checkBoundingBall(const glm::vec3& point) const
 //以W键为例
 if (_keyboardInput.keyStates[GLFW_KEY_W] != GLFW_RELEASE)
 {
-  cameraPos = cameraMoveSpeed * _camera->getFront();
-  _camera->position += cameraPos;
-  if (checkBounding(_camera->position + 10.0f * cameraPos))
-    _camera->position -= cameraPos;
+  if (player == 0)
+  {
+    cameraPos = cameraMoveSpeed * _camera->getFront();
+    if (!checkBounding(_camera->position + 11.0f * cameraPos))
+      _camera->position += cameraPos;
+  }
+  else
+  {
+    cameraPos = cameraMoveSpeed * _camera->getFront();
+    if (!checkBounding(_camera->position + 11.0f * cameraPos))
+    {
+      _camera->position.x += cameraPos.x;
+      _camera->position.z += cameraPos.z;
+    }
+  }
 }
 ```
 
-#### 八叉树
+#### 2.8.2 八叉树
 八叉树主要由一个数据结构和三个函数组成
 ```c++
 //八叉树数据结构，xmin等六个数是当前八叉树的立方体包围盒，data储存了碰撞数据，1为发生碰撞，0为不碰撞(默认为0)
@@ -541,10 +796,119 @@ template <class T>
   inline bool find(OctreeNode<T>*& p, double x, double y, double z);
 ```
 
-## 玩法相关
+### 2.9 完整三维游戏，具有可玩性
 
-### 快捷键
-### 按键介绍
+有碰撞检测的迷宫，第一人称逼真视角能看到自己的手，游戏遇到困难可以开挂，可以和模型互动，游戏失败有gameover弹窗提示
 
-n：回到出生点
-m：回到终点
+与熊互动
+
+```c++
+    if ((((_bear0->position.x - _camera->position.x) * (_bear0->position.x - _camera->position.x) + (_bear0->position.z - _camera->position.z) * (_bear0->position.z - _camera->position.z)) < 9.0)
+        && (((_bear0->position.x - _camera->position.x) * (_bear0->position.x - _camera->position.x) + (_bear0->position.z - _camera->position.z) * (_bear0->position.z - _camera->position.z)) >= 1.0))
+        if ((_bear0->position.y - _camera->position.y) < 1.0 && (_bear0->position.y - _camera->position.y) > -1.0)
+        {
+            if (_bear0->position.x > _camera->position.x)
+                _bear0->position.x -= 0.01 * (3.0 - (_bear0->position.x - _camera->position.x));
+            if (_bear0->position.x < _camera->position.x)
+                _bear0->position.x += 0.01 * (3.0 - (_bear0->position.x - _camera->position.x));
+            if (_bear0->position.z > _camera->position.z)
+                _bear0->position.z -= 0.01 * (3.0 - (_bear0->position.z - _camera->position.z));
+            if (_bear0->position.z < _camera->position.z)
+                _bear0->position.z += 0.01 * (3.0 - (_bear0->position.z - _camera->position.z));
+        }
+    if (((_bear0->position.x - _camera->position.x) * (_bear0->position.x - _camera->position.x) + (_bear0->position.z - _camera->position.z) * (_bear0->position.z - _camera->position.z)) <= 1.0) {
+        _spotLight->position = _camera->position + glm::vec3(0.0f, 0.0f, 0.0f);
+        _spotLight->rotation = glm::angleAxis(glm::radians(0.0f), -glm::vec3(1.0f, 1.0f, 1.0f));
+        if (neng < 0.6) {
+            neng += 0.001;
+            _spotLight->angle = neng;
+        }
+        _spotLight->color = { 1.0f, 0.0f, 0.0f };
+        _light->intensity = 0.0;
+
+    }
+    _blendShader->setMat4("model", _bear0->getModelMatrix());
+    _bear0->draw();
+```
+
+开挂提示
+
+```c++
+if (hint == 1) {
+  _bear1->position.x = _camera->position.x;
+  _bear1->position.y = -14.0f;
+  _bear1->position.z = _camera->position.z;
+
+  _blendShader->setMat4("model", _bear1->getModelMatrix());
+  _bear1->draw();
+  hint = 0;
+}
+```
+
+自己的手
+
+```c++
+_arml->rotation = _camera->rotation * glm::angleAxis(anglel, axis);
+_armr->rotation = _camera->rotation * glm::angleAxis(angler, axis);
+```
+
+### 2.10 对象表达能力，能够表达门、墙等
+
+关闭的门不可通行，可以按k键开门
+
+```c++
+if (_keyboardInput.keyStates[GLFW_KEY_K] != GLFW_RELEASE)
+{
+  knocky = true;
+}
+if (knocky == true && _keyboardInput.keyStates[GLFW_KEY_K] == GLFW_RELEASE)
+{
+  knock = !knock;
+  knocky = false;
+}
+```
+
+```c++
+if (knock == true)
+  _door->position = glm::vec3(2.0f, 2.0f, 2.0f);
+else
+  _door->position = glm::vec3(2.0f, 1.0f, 2.0f);
+_blendShader->setMat4("model", _door->getModelMatrix());
+_door->draw();
+```
+
+迷宫的墙始终不可通行:用碰撞检测实现
+
+## 3 玩法相关
+
+### 3.1 快捷键
+
+- n：回到出生点
+- m：回到终点
+- r：球向上平移
+- y：球向下平移
+- f：球向左平移
+- h：球向右平移
+- t：球向上平移
+- g：球向下平移
+- -：球缩小
+- =：球放大
+- k：开/关门
+- o：orbit
+- b：摄像机焦距回到初始状态
+- backspace：摄像机回到初始状态
+- enter：显示/隐藏光标
+- p：截图
+- 鼠标滚轮：Zoom In/Out
+
+### 3.2 游戏模式
+
+- game模式：wasd控制第一人称2.5维相机，q：开挂，e不开挂
+
+- show模式：wasdqe控制第一人称三维相机
+
+## 4 code specification
+
+- 采用visual studio c++代码规则
+
+- 缩进：2空格
