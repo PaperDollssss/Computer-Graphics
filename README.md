@@ -1,8 +1,14 @@
 # Computer-Graphics Final Project
 
-# 《玩具能的午夜后宫》
+**《玩具能的午夜后宫》**
 
-## Way to Compile
+> 魏辰 3200100505 地理信息科学
+>
+> 
+
+## 0 Foreword
+
+### 0.0 Way to Compile and Hints
 
 ```bash
 cmake -Bbuild .
@@ -10,33 +16,14 @@ cd build
 cmake --build . --parallel 8
 ```
 
-## 0 To Do
+- 程序适应跨平台开发，如果是Windows平台，则建议使用Visual Studio打开
+- 在MSVC+Visual Studio debug 模式下打开该程序，会报出绘制纹理向量越界问题，切换 release 模式即可解决该问题。
 
-### 0.0 bug汇总与解决记录
+- 在windows下如果直接打开exe需要修改模型相对路径：将所有 ../ 改为 ../../
 
-> - [x] 爬墙问题已解决并简化碰撞检测代码
->
-> - [ ] MSVC+windows11sdk环境下，绘制纹理向量越界问题：仍在debuging
->
-> - [x] ../和../../的问题：使用vs调试器和mac gcc都可直接运行。windows下直接打开exe仍需修改（不建议这么做）
->
-> - [x] windows.h的问题：已解决，现在的情况就是，windows下可以使用截屏和添加音乐两个函数，且已经截屏函数已经添加。mac请直接无视这部分，就当不能截屏和插入音乐。
->
->     截屏生成的图片保存在exe同目录（直接运行exe）/工程同目录（使用vs调试器）音乐函数已经实现了重复调用样例（覆盖），按N键实现（同时传送到起点）
->
->
-> ```c++
-> #if _WIN32
-> SaveScreenShot(_windowWidth, _windowHeight);
-> #endif
-> 
-> #if _WIN32
-> void PlayMusic(music_path);
-> #endif
-> //请使用上面的方式而非直接调用该函数
-> ```
->
-> - [ ] 最后记得讲注释里的英文全部删除，清理warning！
+- 截屏生成的图片保存在
+  - exe同目录：直接运行exe
+  - 工程同目录：使用 Visual Studio 调试
 
 ### 0.1 总体要求
 **40 total**
@@ -72,8 +59,14 @@ cmake --build . --parallel 8
 - [ ] 其他……
 
 ## 1 Introduction
-### 1.1 All Introduction
-### 1.2 Module introduction
+### 1.1 总体介绍
+### 1.2 模型简介
+
+把2里面的内容简单模型复制过来
+
+### 1.3 程序总体框架
+
+一张思维导图
 
 ## 2 Module implementation
 
@@ -733,9 +726,9 @@ std::shared_ptr<Model> npc::changeModel()
 
 ### 2.8 空间碰撞检测
 
-简单写一下包围盒与八叉树实现碰撞检测的部分原理
+利用AABB包围盒和空间八叉树算法实现了空间碰撞检测。
 #### 2.8.1 包围盒
-基本AABB矩形包围盒部分，在助教给出的model.boundingbox属性上进行添改，增加了包围盒顶点坐标变换（与模型一起进行空间坐标变换）
+基本AABB矩形包围盒部分，在model.boundingbox属性上进行添改，增加了包围盒顶点坐标变换（与模型一起进行空间坐标变换）
 ```c++
 //在加载模型时使用计算函数进行包围盒计算
 void Model::computeBoundingBox()
@@ -770,7 +763,16 @@ if (_keyboardInput.keyStates[GLFW_KEY_W] != GLFW_RELEASE)
 ```
 
 #### 2.8.2 八叉树
-八叉树主要由一个数据结构和三个函数组成
+八叉树主要由一个数据结构和三个函数组成。
+
+注意，由于计算量较大，我们现在的程序中只对迷宫采取的八叉树划分，但其他任意模型都可以使用三个函数来简单引入八叉树碰撞模型（需要足够的顶点才能保证效果）。
+
+分为三个步骤：
+
+1. 首先给出一块空间长方体范围，对其进行八叉树空间划分
+2. 将模型的所有顶点循环代入计算该点所在的最小八叉树叶节点，将该节点标记为会碰撞
+3. 对于相机移动，将其移动的将来坐标带入整颗八叉树中，查找最小叶节点是否被标记碰撞，如果是，则返回会碰撞
+
 ```c++
 //八叉树数据结构，xmin等六个数是当前八叉树的立方体包围盒，data储存了碰撞数据，1为发生碰撞，0为不碰撞(默认为0)
 template <class T>
@@ -879,7 +881,7 @@ _door->draw();
 
 迷宫的墙始终不可通行:用碰撞检测实现
 
-## 3 玩法相关
+## 3 How to play
 
 ### 3.1 快捷键
 
@@ -912,7 +914,7 @@ _door->draw();
 - 背景音乐：受游戏模式控制，一直存在
 - 游戏模式的兽吼心跳：受与熊的距离控制音量，远到一定程度就不发出声音
 
-## 4 code specification
+## 4 Code specification
 
 - 采用visual studio c++代码规则
 
