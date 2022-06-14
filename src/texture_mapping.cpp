@@ -31,6 +31,8 @@ bool knocky = false;
 glm::mat4 view1;
 int player = 0;
 int hint = 1;
+float distance = 100.0f;
+float sumtime = 0.0f;
 glm::vec3 camtemp;
 double neng = 0.0;
 
@@ -177,9 +179,6 @@ TextureMapping::TextureMapping(const Options &options) : Application(options)
   boundingmode = true;
 
   // add music
-#if _WIN32
-  PlayMusic(musicPath);
-#endif
 }
 
 TextureMapping::~TextureMapping()
@@ -419,9 +418,6 @@ void TextureMapping::handleInput()
   if (_keyboardInput.keyStates[GLFW_KEY_N] != GLFW_RELEASE)
   {
     _camera->position = glm::vec3(13.269848, -14.500000, 23.273075);
-#if _WIN32
-    PlayMusic(musicPath2);
-#endif
   }
   if (_keyboardInput.keyStates[GLFW_KEY_M] != GLFW_RELEASE)
   {
@@ -512,8 +508,6 @@ void TextureMapping::handleInput()
 
 void TextureMapping::renderFrame()
 {
-    printf("%f,%f,%f\n", _camera->position.x, _camera->position.y, _camera->position.z);
-
   glm::vec3 XYD{xd, yd, 1.0f};
   static bool wireframe = false;
   showFpsInWindowTitle();
@@ -553,6 +547,11 @@ void TextureMapping::renderFrame()
   switch (_renderMode)
   {
   case RenderMode::Game:
+    if (player != 1) {
+#if _WIN32
+        PlayMusic(musicPath);
+#endif
+    }
     player = 1;
     _blendShader->use();
     _blendShader->setMat4("projection", projection);
@@ -604,6 +603,7 @@ void TextureMapping::renderFrame()
       _bear1->draw();
       hint = 0;
     }
+    distance = sqrt((_bear0->position.x - _camera->position.x) * (_bear0->position.x - _camera->position.x) + (_bear0->position.z - _camera->position.z) * (_bear0->position.z - _camera->position.z));
 
     if (knock == true)
     {
@@ -642,8 +642,21 @@ void TextureMapping::renderFrame()
     // _blendShader->setInt("mapKds[1]", 1);
     _blendShader->setMat4("model", _armr->getModelMatrix());
     _armr->draw();
+    sumtime += _deltaTime;
+    if (sumtime >= 3.0f) {
+        //std::cout << "3s" << std::endl;
+        sumtime = 0.0f;
+#if _WIN32
+        Playaddition(distance, heartsound);
+#endif
+    }
     break;
   case RenderMode::Show:
+    if (player != 0) {
+#if _WIN32
+        PlayMusic(musicPath2);
+#endif
+    }
     player = 0;
     _blendShader->use();
     _blendShader->setMat4("projection", projection);

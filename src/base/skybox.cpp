@@ -75,7 +75,7 @@ SkyBox::SkyBox(const std::vector<std::string> &textureFilenames)
         "   gl_Position = (projection * view * vec4(aPosition, 1.0f)).xyww;\n"
         "}\n";
 
-    const char *fsCode =
+    const char* fsCode =
         "#version 330 core\n"
         "out vec4 color;\n"
         "in vec3 texCoord;\n"

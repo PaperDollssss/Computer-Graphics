@@ -3,5 +3,5 @@
 #include <string>
 // addmusic
 void PlayMusic(std::string path);
-
+void Playaddition(float distance, std::string path);
 #endif
