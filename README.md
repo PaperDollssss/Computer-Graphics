@@ -75,11 +75,6 @@ cmake --build . --parallel 8
 
 能、迷宫、跳舞的女人：外部模型导入。
 
-
-### 1.3 程序总体框架
-
-一张思维导图
-
 ## 2 Module implementation
 
 ### 2.1 基本体素建模表达
