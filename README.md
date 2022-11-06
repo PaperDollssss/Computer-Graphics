@@ -1,6 +1,6 @@
 # Computer-Graphics Final Project
 
-**《the Nightmares of Toy-Bear》**
+**《THE NIGHTMARES OF TOY-BEAR》**
 
 > 魏辰 3200100505 地理信息科学
 > 
