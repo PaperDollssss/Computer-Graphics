@@ -1,14 +1,4 @@
-# Computer-Graphics Final Project
-
-# 《THE NIGHTMARES OF TOY-BEAR》
-
-> 魏辰 3200100505 地理信息科学
-> 
-> 杨可轶 3200101042 地理信息科学
-> 
-> 胡宇森 3200100578 地理信息科学
-> 
-> 黄睿 3200101027 地理信息科学
+# THE NIGHTMARES OF TOY-BEAR: Computer-Graphics Final Project
 
 ## 0 Foreword
 
@@ -19,42 +9,6 @@ cmake -Bbuild .
 cd build
 cmake --build . --parallel 8
 ```
-
-- 程序适应跨平台开发，如果是Windows平台，则建议使用Visual Studio打开
-- 在MSVC+Visual Studio debug 模式下打开该程序，会报出绘制纹理向量越界问题，切换 release 模式即可解决该问题。
-
-- 在windows下如果直接打开exe需要修改模型相对路径：将所有 ../ 改为 ../../
-
-- 截屏生成的图片保存在
-  - exe同目录：直接运行exe
-  - 工程同目录：使用 Visual Studio 调试
-
-### 0.1 总体要求
-**40 total**
-
-简单室内场景三维建模及真实感绘制
-
-### 0.2 基本要求
-**35 total, 5 each**
-- [x] 基本体素的建模表达能力
-- [x] 基本三维网格(obj)导入导出
-- [x] 基本材质、纹理的显示与编辑
-- [x] 基本几何变换(旋转、平移与缩放)
-- [x] 基本光照明模型，基本光源的编辑
-- [x] 场景漫游如Zoom In/Out, Pan, Orbit, Zoom to Fit等
-- [x] 多帧连续绘制，屏幕截取与保存
-### 0.3 额外要求
-**5 each,  according to the specific effect. Up to 40 in total**
-- [ ] NURBS曲面建模能力
-- [x] 空间碰撞检测
-- [ ] 光照模型细化
-- [ ] 其他平台实现
-- [x] 完整三维游戏，注重核心玩法实现
-- [ ] 增强现实应用结合
-- [x] 一定的对象表达与交互能力，如门、窗、墙等
-### 0.4 其他
-- [x] 添加音乐
-- [ ] 其他……
 
 ## 1 Introduction
 ### 1.1 总体介绍
